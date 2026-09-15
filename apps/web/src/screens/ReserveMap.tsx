@@ -356,7 +356,6 @@ export const ReserveMap: React.FC = () => {
 
   // Z-LEVEL 1: 3D SUBSURFACE VOXELS (Deck.GL PointCloud)
   const deckLayers = getSubsurfaceBlockLayers({
-    data: processedGrid,
     depthRange,
     visible: activeLayers.subsurfaceBlock,
   });
@@ -371,10 +370,10 @@ export const ReserveMap: React.FC = () => {
     >
       <DeckGL
         initialViewState={{
-          longitude: currentSite.lng,
-          latitude: currentSite.lat,
-          zoom: currentSite.zoom,
-          pitch: 65,
+          longitude: 80.201,
+          latitude: 21.874,
+          zoom: 14.5,
+          pitch: 60,
           bearing: 35,
           maxPitch: 85
         }}
@@ -383,7 +382,7 @@ export const ReserveMap: React.FC = () => {
         getTooltip={({object}: any) => {
           if (!object) return null;
           if (object.coordinates) return "TARGET: 125m Depth | 49.2% Mn | Dip: 65°N";
-          return `Depth: ${Math.round(object.depthMeters)}m | ${Math.round(object.mnGrade * 10)/10}% Mn`;
+          return `Depth: ${Math.round(Math.abs(object.depth))}m | ${Math.round(object.grade * 10)/10}% Mn`;
         }}
         style={{ width: '100%', height: '100%' }}
       >
