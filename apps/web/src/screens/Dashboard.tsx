@@ -6,6 +6,7 @@ import type { ProductionSeries, RiskAlert, ReserveCell } from '../data/types/mod
 import { motionPresets } from '../theme/tokens';
 import { AlertTriangle, Activity, Database, ArrowRight, TrendingUp, Shield } from 'lucide-react';
 import { DashboardSkeleton, ErrorState } from '../components/Skeletons';
+import { IsroSatellitePanel } from '../components/IsroSatellitePanel';
 
 /* ─── Count-Up ─── */
 const CountUp: React.FC<{ value: number; format?: (v: number) => string; duration?: number }> = ({
@@ -387,6 +388,15 @@ export const Dashboard: React.FC = () => {
               <span className={`font-semibold ${chip.color}`}>{chip.value}</span>
             </div>
           ))}
+        </motion.div>
+        
+        {/* ISRO Satellite Preview Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+        >
+          <IsroSatellitePanel />
         </motion.div>
       </div>
     </div>

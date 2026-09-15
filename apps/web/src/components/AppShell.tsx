@@ -12,6 +12,9 @@ const NAV_ITEMS = [
   { id: 'production',      label: 'Production',      path: '/production'     },
   { id: 'alerts',          label: 'Alerts',          path: '/alerts'         },
   { id: 'recommendations', label: 'Recommendations', path: '/recommendations'},
+  { id: 'corporate',       label: 'Corporate View',  path: '/corporate'      },
+  { id: 'national',        label: 'National Overview', path: '/national'     },
+  { id: 'satellite',       label: 'ISRO Satellite',  path: '/satellite'      },
 ];
 
 export const AppShell: React.FC = () => {
