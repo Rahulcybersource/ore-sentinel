@@ -189,12 +189,9 @@ export const ReserveMap: React.FC = () => {
     }
 
     const highMedPoints: { lat: number; lng: number }[] = [];
-    const processed = rawGrid.map((cell, index) => {
-      const row = Math.floor(index / 10);
-      const col = index % 10;
-      
-      const realLat = currentSite.lat + (row - 4.5) * 0.0022;
-      const realLng = currentSite.lng + (col - 4.5) * 0.0024;
+    const processed = rawGrid.map((cell) => {
+      const realLat = cell.lat;
+      const realLng = cell.lng;
       const mnGrade = (cell.probability * 32) + 22;
       
       let tier: 'high' | 'medium' | 'low';

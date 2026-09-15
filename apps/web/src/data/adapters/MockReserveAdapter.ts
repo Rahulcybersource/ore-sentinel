@@ -1,27 +1,24 @@
 // MOCK DATA
 import type { ReserveDataAdapter } from './ReserveDataAdapter';
 import type { ReserveCell } from '../types/models';
+import { generateStrikeAlignedAssays } from '../../utils/geologySimulator';
 
 export class MockReserveAdapter implements ReserveDataAdapter {
   async getReserveGrid(mineId: string): Promise<ReserveCell[]> {
     if (mineId === 'balaghat') {
-      const grid: ReserveCell[] = [];
-      for(let x = 0; x < 10; x++) {
-        for(let z = 0; z < 10; z++) {
-          const probability = Math.random();
-          const isHigh = probability > 0.6;
-          grid.push({
-            id: 'b-' + x + '-' + z,
-            lat: 21.8 + x * 0.005,
-            lng: 80.2 + z * 0.005,
-            probability,
-            confidenceScore: Math.random() * 0.3 + 0.6,
-            contributingFactors: isHigh 
-              ? ['High iron-oxide index', 'Proximity to Borehole #47'] 
-              : ['Weak satellite spectral signature', 'Surface topology mismatch']
-          });
-        }
-      }
+      const geojson = generateStrikeAlignedAssays([80.201, 21.874], 75);
+      
+      const grid: ReserveCell[] = geojson.features.map((feature: any) => ({
+        id: feature.properties.id,
+        lat: feature.properties.realLat,
+        lng: feature.properties.realLng,
+        probability: feature.properties.probability,
+        confidenceScore: feature.properties.confidenceScore,
+        contributingFactors: feature.properties.probability > 0.6 
+          ? ['High iron-oxide index', 'Proximity to Borehole #47', 'Sausar Group Alignment'] 
+          : ['Weak satellite spectral signature', 'Surface topology mismatch']
+      }));
+      
       return grid;
     }
     return [];
