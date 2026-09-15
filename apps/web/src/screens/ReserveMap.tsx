@@ -183,16 +183,17 @@ export const ReserveMap: React.FC = () => {
   };
 
   // Anchor every cell around the real site coordinates (~1-2km radius)
-  const { processedGrid, corridorFeature } = useMemo(() => {
-    if (!rawGrid.length) {
-      return { processedGrid: [], corridorFeature: null };
+  const { processedGrid, corridorFeature, rawFeatureCollection } = useMemo(() => {
+    if (!rawGrid || !rawGrid.features) {
+      return { processedGrid: [], corridorFeature: null, rawFeatureCollection: null };
     }
 
     const highMedPoints: { lat: number; lng: number }[] = [];
-    const processed = rawGrid.map((cell) => {
-      const realLat = cell.lat;
-      const realLng = cell.lng;
-      const mnGrade = (cell.probability * 32) + 22;
+    const processed = rawGrid.features.map((feature: any) => {
+      const realLat = feature.geometry.coordinates[1];
+      const realLng = feature.geometry.coordinates[0];
+      // Keep mnGrade from geologySimulator directly
+      const mnGrade = feature.properties.mnGrade;
       
       let tier: 'high' | 'medium' | 'low';
       if (mnGrade >= 44) tier = 'high';
@@ -203,7 +204,13 @@ export const ReserveMap: React.FC = () => {
         highMedPoints.push({ lat: realLat, lng: realLng });
       }
 
-      return { ...cell, realLat, realLng, mnGrade, tier };
+      return { 
+        ...feature.properties, 
+        realLat, 
+        realLng, 
+        mnGrade, 
+        tier 
+      };
     });
 
     const hull = getConvexHull(highMedPoints);
@@ -219,7 +226,7 @@ export const ReserveMap: React.FC = () => {
       }]
     } : null;
 
-    return { processedGrid: processed, corridorFeature: corridor };
+    return { processedGrid: processed, corridorFeature: corridor, rawFeatureCollection: rawGrid };
   }, [rawGrid, currentSite]);
 
   const recommendation = useMemo(() => {
@@ -406,7 +413,7 @@ export const ReserveMap: React.FC = () => {
 
         {/* ── Z-LEVEL 4+5: HEATMAP & DRILL TARGET AI (self-contained) ── */}
         <MineralHeatmapLayer 
-          gridData={processedGrid} 
+          featureCollection={rawFeatureCollection} 
           recommendation={recommendation} 
           opacity={activeLayers.nasaMn ? 0.75 : 0}
           visible={activeLayers.nasaMn}

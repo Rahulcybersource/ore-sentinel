@@ -5,7 +5,7 @@ import { Target, Sparkles, X, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface MineralHeatmapLayerProps {
-  gridData: any[];
+  featureCollection: any; // GeoJSON FeatureCollection
   recommendation: {
     lat: number;
     lng: number;
@@ -20,7 +20,7 @@ interface MineralHeatmapLayerProps {
 }
 
 export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
-  gridData,
+  featureCollection,
   recommendation,
   opacity,
   visible = true,
@@ -56,22 +56,6 @@ export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
     }
   }, [showPopup, recommendation]);
 
-  // Transform gridData into GeoJSON for the heatmap
-  const geojsonData = React.useMemo(() => {
-    const features = gridData.map(cell => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [cell.realLng, cell.realLat]
-      },
-      properties: {
-        confidenceScore: cell.confidenceScore || 0
-      }
-    }));
-
-    return { type: 'FeatureCollection', features };
-  }, [gridData]);
-
   // MOIL grade classification
   const getMoilGradeLabel = (grade: number) => {
     if (grade >= 44) return { label: 'Ferro Grade', color: 'text-green-400', bar: 'bg-green-500', badge: '🟢' };
@@ -91,7 +75,7 @@ export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
   return (
     <>
       {/* ── Z-LEVEL 4: HEATMAP (confidence score KDE) ──────────────── */}
-      <Source id="mineral-heatmap-source" type="geojson" data={geojsonData}>
+      <Source id="mineral-heatmap-source" type="geojson" data={featureCollection}>
         <Layer
           id="nasa-hyperspectral-heatmap"
           type="heatmap"

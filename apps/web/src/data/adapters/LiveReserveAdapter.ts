@@ -1,9 +1,10 @@
 import type { ReserveDataAdapter } from "./ReserveDataAdapter";
+import { FeatureCollection } from "geojson";
 import type { ReserveCell } from "../types/models";
 import { MockReserveAdapter } from "./MockReserveAdapter";
 
 export class LiveReserveAdapter implements ReserveDataAdapter {
-  async getReserveGrid(mineId: string): Promise<ReserveCell[]> {
+  async getReserveGrid(mineId: string): Promise<FeatureCollection> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
