@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { NATIONAL_MN_REGISTRY } from '../data/constants/mineRegistry';
 
 export function IsroSatellitePanel() {
-  const { isro } = useAdapters();
+  const { satellite } = useAdapters();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,9 +22,9 @@ export function IsroSatellitePanel() {
       try {
         let result;
         if (param === 'NDVI') {
-          result = await isro.getNdviTimeSeries(lat, lng, '20230101', '20231231');
+          result = await satellite.getNdviTimeSeries(lat, lng, '20230101', '20231231');
         } else {
-          result = await isro.getVegetationIndex(lat, lng, param, '20230101', '20231231');
+          result = await satellite.getVegetationIndex(lat, lng, param, '20230101', '20231231');
         }
         if (mounted) setData(result);
       } catch (err: any) {
@@ -35,7 +35,7 @@ export function IsroSatellitePanel() {
     };
     fetchData();
     return () => { mounted = false; };
-  }, [isro, lat, lng, param]);
+  }, [satellite, lat, lng, param]);
 
   return (
     <div className="bg-navy-950 border border-saffron-500/20 rounded-lg p-4 shadow-[0_0_15px_rgba(0,32,91,0.5)]">

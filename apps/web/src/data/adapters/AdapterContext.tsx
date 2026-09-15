@@ -3,11 +3,13 @@ import type { ReserveDataAdapter } from './ReserveDataAdapter';
 import type { ProductionDataAdapter } from './ProductionDataAdapter';
 import type { AlertsAdapter } from './AlertsAdapter';
 import type { RecommendationsAdapter } from './RecommendationsAdapter';
+import type { IsroSatelliteAdapter } from './IsroSatelliteAdapter';
 import { MockReserveAdapter } from './MockReserveAdapter';
 import { MockProductionAdapter } from './MockProductionAdapter';
 import { MockAlertsAdapter } from './MockAlertsAdapter';
 import { MockRecommendationsAdapter } from './MockRecommendationsAdapter';
 import { LiveReserveAdapter } from './LiveReserveAdapter';
+import { LiveIsroSatelliteAdapter, MockIsroSatelliteAdapter } from './IsroSatelliteAdapter';
 
 export interface MapLayerState {
   isroFaults: boolean;
@@ -20,6 +22,7 @@ export interface Adapters {
   production: ProductionDataAdapter;
   alerts: AlertsAdapter;
   recommendations: RecommendationsAdapter;
+  satellite: IsroSatelliteAdapter;
   mapLayers: MapLayerState;
   toggleMapLayer: (layer: keyof MapLayerState) => void;
 }
@@ -42,6 +45,7 @@ export const AdapterProvider: React.FC<{ children: React.ReactNode }> = ({ child
       production: new MockProductionAdapter(),
       alerts: new MockAlertsAdapter(),
       recommendations: new MockRecommendationsAdapter(),
+      satellite: useLive ? new LiveIsroSatelliteAdapter() : new MockIsroSatelliteAdapter(),
     };
   }, []);
 
