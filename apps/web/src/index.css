@@ -1,23 +1,124 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "sans-serif";
-  --font-mono: "JetBrains Mono", "monospace";
+  --font-sans: "Space Grotesk", "sans-serif";
+  --font-inter: "Inter", "sans-serif";
 
-  --color-navy-900: #0B1220;
-  --color-navy-800: #111C30;
-  --color-navy-700: #172640;
-  --color-teal-400: #26F0D8;
-  --color-teal-500: #00D9C0;
-  --color-teal-600: #00B29E;
-  --color-amber-400: #FFC04D;
-  --color-amber-500: #FFB020;
-  --color-amber-600: #E59819;
-  --color-danger-500: #FF4500;
-  --color-danger-600: #E03D00;
+  --color-app-bg: #080a12;
+  --color-card-bg: rgba(255,255,255,0.04);
+  --color-border-gray: rgba(255,255,255,0.08);
+
+  --color-accent-400: #F3C354;
+  --color-accent-500: #E2B141;
+  --color-accent-glow: rgba(243,195,84,0.25);
+
+  --color-muted-400: #9ca3af;
+  --color-muted-500: #6b7280;
+
+  --color-danger-500: #ef4444;
+  --color-amber-400: #fbbf24;
 }
 
+/* ─── Body: full-bleed starfield ─── */
 body {
-  @apply bg-navy-900 text-slate-100 font-sans antialiased;
+  @apply text-white font-sans antialiased;
+  background-color: #080a12;
+  background-image:
+    url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=85&w=3000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+  min-height: 100vh;
 }
+
+/* ─── Glassmorphic base card ─── */
+.glass-panel {
+  background: rgba(12, 14, 22, 0.55);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Gold-glow glass card (for KPI widgets) ─── */
+.glass-card {
+  background: rgba(14, 16, 26, 0.50);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(243, 195, 84, 0.15);
+  border-radius: 12px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.glass-card:hover {
+  border-color: rgba(243, 195, 84, 0.35);
+  box-shadow:
+    0 4px 32px rgba(0, 0, 0, 0.45),
+    0 0 20px rgba(243, 195, 84, 0.08);
+}
+
+/* ─── Alert-red glass card ─── */
+.glass-card-danger {
+  background: rgba(14, 16, 26, 0.50);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(239, 68, 68, 0.20);
+  border-radius: 12px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.glass-card-danger:hover {
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.10);
+}
+
+/* ─── Amber glass card ─── */
+.glass-card-amber {
+  background: rgba(14, 16, 26, 0.50);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(251, 191, 36, 0.20);
+  border-radius: 12px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+/* ─── Telemetry label ─── */
+.telemetry-label {
+  @apply text-[10px] font-semibold tracking-[0.18em] text-muted-400 uppercase;
+}
+
+/* ─── Glowing accent divider ─── */
+.glow-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(243,195,84,0.5) 40%, rgba(243,195,84,0.5) 60%, transparent);
+}
+
+/* ─── Animated radar-ping for markers ─── */
+@keyframes radar-ping {
+  0%   { transform: scale(1);   opacity: 0.9; }
+  80%  { transform: scale(2.4); opacity: 0;   }
+  100% { transform: scale(2.4); opacity: 0;   }
+}
+.radar-ping {
+  animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar          { width: 4px; height: 4px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { background: rgba(255,255,255,0.12); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(243,195,84,0.4); }

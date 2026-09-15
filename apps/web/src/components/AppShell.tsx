@@ -1,29 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Map, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckSquare, 
-  Building2,
-  ChevronDown,
-  Clock,
-  Globe2
-} from 'lucide-react';
+import { ChevronDown, Radio } from 'lucide-react';
 import { motionPresets } from '../theme/tokens';
 
 type Role = 'Planner' | 'Geologist' | 'Site Head' | 'Corporate';
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['Planner', 'Site Head', 'Corporate'] },
-  { id: 'map', label: 'Reserve Map', path: '/map', icon: Map, roles: ['Planner', 'Geologist'] },
-  { id: 'production', label: 'Production', path: '/production', icon: TrendingUp, roles: ['Planner', 'Site Head'] },
-  { id: 'alerts', label: 'Alerts', path: '/alerts', icon: AlertTriangle, roles: ['Geologist', 'Site Head'] },
-  { id: 'recommendations', label: 'Recommendations', path: '/recommendations', icon: CheckSquare, roles: ['Planner', 'Site Head'] },
-  { id: 'corporate', label: 'Corporate View', path: '/corporate', icon: Building2, roles: ['Corporate'] },
-  { id: 'national', label: 'National Overview', path: '/national', icon: Globe2, roles: ['Corporate', 'Planner'] },
+  { id: 'dashboard',       label: 'Dashboard',       path: '/'               },
+  { id: 'map',             label: 'Reserve Map',     path: '/map'            },
+  { id: 'production',      label: 'Production',      path: '/production'     },
+  { id: 'alerts',          label: 'Alerts',          path: '/alerts'         },
+  { id: 'recommendations', label: 'Recommendations', path: '/recommendations'},
 ];
 
 export const AppShell: React.FC = () => {
@@ -34,113 +22,115 @@ export const AppShell: React.FC = () => {
   useEffect(() => {
     fetch('http://localhost:4000/api/status')
       .then(r => r.json())
-      .then(status => {
-        if (status.lastPopulated) setDataTimestamp(status.lastPopulated);
-      })
-      .catch(() => { /* proxy offline, no timestamp to show */ });
+      .then(s => { if (s.lastPopulated) setDataTimestamp(s.lastPopulated); })
+      .catch(() => {});
   }, []);
 
   const formatTs = (iso: string) => {
     const d = new Date(iso);
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-      + ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      + ' · ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
-    <div className="flex h-screen bg-navy-900 text-slate-100 overflow-hidden font-sans">
-      
-      {/* Sidebar Nav */}
-      <nav className="w-64 bg-navy-800 border-r border-navy-700 flex flex-col z-20">
-        <div className="p-6 border-b border-navy-700">
-          <h1 className="text-2xl font-bold text-teal-400 tracking-wide">ORE-SENTINEL</h1>
-          <p className="text-xs text-slate-400 font-mono mt-1 uppercase tracking-wider">Moil Analytics</p>
-        </div>
+    /* Full viewport – starfield shows around and behind the card */
+    <div className="flex h-screen items-center justify-center p-5 md:p-8 relative overflow-hidden">
 
-        <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
-            const isEmphasized = item.roles.includes(role);
-            
-            return (
-              <NavLink 
-                key={item.id} 
-                to={item.path}
-                className={({ isActive }) => `
-                  flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
-                  ${isActive 
-                    ? 'bg-navy-700 text-teal-400' 
-                    : isEmphasized 
-                      ? 'text-slate-200 hover:bg-navy-700/50 hover:text-teal-400'
-                      : 'text-slate-500 hover:text-slate-300 opacity-60 hover:opacity-100'
-                  }
-                `}
-              >
-                <item.icon size={20} className="shrink-0" />
-                <span className="font-medium text-sm">{item.label}</span>
-              </NavLink>
-            );
-          })}
-        </div>
+      {/* ── Ambient glow blobs ── */}
+      <div className="pointer-events-none select-none absolute inset-0 overflow-hidden">
+        <div className="absolute top-[-15%] left-[-10%] w-[600px] h-[600px] bg-accent-400/[0.06] rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-5%] w-[500px] h-[500px] bg-purple-700/[0.08] rounded-full blur-[120px]" />
+        <div className="absolute top-[35%] right-[20%] w-[300px] h-[300px] bg-cyan-600/[0.05] rounded-full blur-[90px]" />
+      </div>
 
-        {/* Data Sources & Attribution */}
-        <div className="p-4 border-t border-navy-700">
-          <h3 className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Data Sources & Attribution</h3>
-          <ul className="text-[9px] text-slate-500 space-y-1 mb-3 leading-tight">
-            <li>&bull; Satellite Basemap: Esri World Imagery &copy; Esri, Maxar, Earthstar Geographics</li>
-            <li>&bull; Sentinel-2: Contains modified Copernicus Sentinel data [2026]</li>
-            <li>&bull; Rainfall forecast: Open-Meteo</li>
-            <li>&bull; LST: MODIS MOD11A2, NASA LP DAAC</li>
-            <li>&bull; Base Map: &copy; OpenStreetMap contributors</li>
-            <li>&bull; Grade thresholds per MOIL published pricing/grade standards (Mn-44% and above = Ferro grade).</li>
-            <li>&bull; National Mineral Inventory: GSI / IBM UNFC [495.87 Mt Reserves & Resources].</li>
-          </ul>
+      {/* ── Main floating glass shell ── */}
+      <div
+        className="relative w-full max-w-[1380px] h-full flex flex-col overflow-hidden"
+        style={{
+          background: 'rgba(8, 10, 18, 0.60)',
+          backdropFilter: 'blur(28px) saturate(160%)',
+          WebkitBackdropFilter: 'blur(28px) saturate(160%)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: '20px',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.06)',
+        }}
+      >
 
-          {/* Step 13: Data freshness timestamp */}
-          {dataTimestamp && (
-            <div className="flex items-center gap-1.5 text-[9px] text-slate-500 mb-3">
-              <Clock size={10} className="shrink-0 text-teal-500" />
-              <span>Data as of {formatTs(dataTimestamp)}</span>
+        {/* ── Top navigation bar ── */}
+        <header
+          className="h-[60px] flex items-center justify-between px-8 shrink-0 z-20"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          {/* Logo */}
+          <div className="flex items-center gap-3 shrink-0 select-none">
+            <div className="relative w-5 h-5">
+              <div className="absolute inset-0 rounded-full border border-accent-400/60" />
+              <div className="absolute inset-[5px] rounded-full bg-accent-400" />
             </div>
-          )}
-
-          <NavLink 
-            to="/style-guide"
-            className={({ isActive }) => `
-              flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-mono
-              ${isActive ? 'text-amber-500 bg-navy-700' : 'text-slate-500 hover:text-amber-400'}
-            `}
-          >
-            Style Guide
-          </NavLink>
-        </div>
-      </nav>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        
-        {/* Top Bar */}
-        <header className="h-16 bg-navy-900 border-b border-navy-700 flex items-center justify-between px-8 z-10">
-          <div className="flex items-center gap-4">
+            <span className="text-[11px] font-semibold tracking-[0.3em] uppercase text-white/90">
+              Ore Sentinel
+            </span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-slate-500 font-mono uppercase tracking-widest">Active Role:</span>
-            <div className="relative">
-              <select 
+          {/* Nav links */}
+          <nav className="hidden lg:flex items-center gap-7">
+            {NAV_ITEMS.map(item => (
+              <NavLink
+                key={item.id}
+                to={item.path}
+                end={item.path === '/'}
+                className={({ isActive }) =>
+                  `text-[10px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 pb-0.5 ${
+                    isActive
+                      ? 'text-accent-400 border-b border-accent-400'
+                      : 'text-muted-400 border-b border-transparent hover:text-white'
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* Right controls */}
+          <div className="flex items-center gap-4 shrink-0">
+            {/* Live pulse */}
+            <div className="hidden xl:flex items-center gap-2">
+              <div className="relative w-2 h-2">
+                <span className="absolute inset-0 rounded-full bg-emerald-400 radar-ping" />
+                <span className="relative block w-2 h-2 rounded-full bg-emerald-400" />
+              </div>
+              <span className="text-[9px] tracking-widest uppercase text-emerald-400/80 font-medium">
+                {dataTimestamp ? `Synced ${formatTs(dataTimestamp)}` : 'Live Feed'}
+              </span>
+            </div>
+
+            {/* Role selector */}
+            <div
+              className="relative"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255,255,255,0.10)',
+                borderRadius: '8px',
+              }}
+            >
+              <select
                 value={role}
-                onChange={(e) => setRole(e.target.value as Role)}
-                className="appearance-none bg-navy-800 border border-navy-700 text-teal-400 font-medium py-1.5 pl-4 pr-10 rounded-md focus:outline-none focus:border-teal-500 transition-colors"
+                onChange={e => setRole(e.target.value as Role)}
+                className="appearance-none bg-transparent text-white text-[10px] font-semibold tracking-[0.15em] uppercase py-2 pl-4 pr-9 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="Planner">Planner</option>
                 <option value="Geologist">Geologist</option>
                 <option value="Site Head">Site Head</option>
                 <option value="Corporate">Corporate</option>
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-teal-500 pointer-events-none" />
+              <ChevronDown size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-400 pointer-events-none" />
             </div>
           </div>
         </header>
 
-        {/* Page Content with AnimatePresence for route transitions */}
+        {/* ── Page content ── */}
         <main className="flex-1 overflow-auto relative">
           <AnimatePresence mode="wait">
             <motion.div
@@ -155,6 +145,18 @@ export const AppShell: React.FC = () => {
             </motion.div>
           </AnimatePresence>
         </main>
+      </div>
+
+      {/* ── Corner branding over the starfield ── */}
+      <div className="absolute bottom-4 left-6 pointer-events-none select-none hidden xl:block">
+        <p className="text-[11px] font-semibold leading-snug tracking-wider uppercase text-white/40">
+          Ore Exploration<br/>& Remote Sensing
+        </p>
+      </div>
+      <div className="absolute top-4 right-6 text-right pointer-events-none select-none hidden xl:block">
+        <p className="text-[13px] font-bold tracking-[0.35em] uppercase text-white/25">
+          ORE<br/>SENTINEL
+        </p>
       </div>
     </div>
   );

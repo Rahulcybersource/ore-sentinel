@@ -419,14 +419,14 @@ export const ReserveMap: React.FC = () => {
             >
               <div className="relative flex flex-col items-center group cursor-pointer">
                 {/* Radar pulse ripples directly over satellite pit */}
-                <div className="absolute -top-3 w-10 h-10 bg-teal-400/40 rounded-full animate-ping pointer-events-none" />
-                <div className="absolute -top-1 w-6 h-6 bg-teal-400/60 rounded-full animate-pulse pointer-events-none" />
+                <div className="absolute -top-3 w-10 h-10 bg-accent-400/40 rounded-full animate-ping pointer-events-none" />
+                <div className="absolute -top-1 w-6 h-6 bg-accent-400/60 rounded-full animate-pulse pointer-events-none" />
                 
-                <div className="p-1.5 bg-teal-400 rounded-full text-navy-950 shadow-[0_0_15px_rgba(0,217,192,0.8)] relative z-10 transition-transform group-hover:scale-110">
+                <div className="p-1.5 bg-accent-400 rounded-full text-app-bg shadow-[0_0_15px_rgba(0,240,255,0.8)] relative z-10 transition-transform group-hover:scale-110">
                   <Target size={20} className="stroke-[2.5]" />
                 </div>
   
-                <div className="mt-1 px-2.5 py-1 bg-navy-900/95 border border-cyan-400/80 rounded-md text-[10px] font-bold text-cyan-300 whitespace-nowrap shadow-2xl backdrop-blur-md uppercase tracking-wider relative z-10">
+                <div className="mt-1 px-2.5 py-1 bg-app-bg/95 border border-accent-400/80 rounded-md text-[10px] font-bold text-accent-400 whitespace-nowrap shadow-2xl backdrop-blur-md uppercase tracking-wider relative z-10 font-mono">
                   Recommended Next Drill Site
                 </div>
               </div>
@@ -443,19 +443,19 @@ export const ReserveMap: React.FC = () => {
               closeButton={false}
               offset={[0, 12]}
             >
-              <div className="bg-navy-900/95 border border-cyan-500/80 p-5 rounded-2xl shadow-2xl w-80 text-slate-100 backdrop-blur-md">
-                <div className="flex justify-between items-start mb-3 border-b border-navy-700/80 pb-2.5">
+              <div className="bg-app-bg/95 border border-accent-400/50 p-5 rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.15)] w-80 text-white backdrop-blur-md">
+                <div className="flex justify-between items-start mb-3 border-b border-accent-400/20 pb-2.5">
                   <div>
-                    <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <span className="telemetry-label flex items-center gap-1.5">
                       <Sparkles size={13} /> AI Exploration Target
                     </span>
-                    <h4 className="font-bold text-slate-100 text-sm mt-0.5">
+                    <h4 className="font-bold text-white text-sm mt-0.5">
                       Recommended Next Drill Site
                     </h4>
                   </div>
                   <button 
                     onClick={() => setShowPopup(false)} 
-                    className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-navy-800 transition-colors"
+                    className="text-muted-400 hover:text-white p-1 rounded-md hover:bg-card-bg transition-colors"
                   >
                     <X size={15} />
                   </button>
@@ -463,37 +463,37 @@ export const ReserveMap: React.FC = () => {
   
                 <div className="space-y-2.5 text-xs">
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-navy-950/80 p-2 rounded-lg border border-navy-700/60">
-                      <span className="text-slate-400 text-[10px] uppercase block mb-0.5">Latitude</span>
-                      <span className="font-mono font-bold text-slate-200">{recommendation.lat.toFixed(6)}°</span>
+                    <div className="bg-card-bg p-2 rounded-lg border border-accent-400/20">
+                      <span className="text-muted-400 text-[10px] uppercase block mb-0.5">Latitude</span>
+                      <span className="font-mono font-bold text-white">{recommendation.lat.toFixed(6)}°</span>
                     </div>
-                    <div className="bg-navy-950/80 p-2 rounded-lg border border-navy-700/60">
-                      <span className="text-slate-400 text-[10px] uppercase block mb-0.5">Longitude</span>
-                      <span className="font-mono font-bold text-slate-200">{recommendation.lng.toFixed(6)}°</span>
+                    <div className="bg-card-bg p-2 rounded-lg border border-accent-400/20">
+                      <span className="text-muted-400 text-[10px] uppercase block mb-0.5">Longitude</span>
+                      <span className="font-mono font-bold text-white">{recommendation.lng.toFixed(6)}°</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-navy-950/80 p-2 rounded-lg border border-navy-700/60">
-                      <span className="text-slate-400 text-[10px] uppercase block mb-0.5">Target Horizon</span>
-                      <span className="font-mono font-bold text-slate-200">{recommendation.targetDepth}</span>
+                    <div className="bg-card-bg p-2 rounded-lg border border-accent-400/20">
+                      <span className="text-muted-400 text-[10px] uppercase block mb-0.5">Target Horizon</span>
+                      <span className="font-mono font-bold text-white">{recommendation.targetDepth}</span>
                     </div>
-                    <div className="bg-navy-950/80 p-2 rounded-lg border border-navy-700/60">
-                      <span className="text-slate-400 text-[10px] uppercase block mb-0.5">Dip Angle</span>
-                      <span className="font-mono font-bold text-slate-200">{recommendation.dipAngle}</span>
+                    <div className="bg-card-bg p-2 rounded-lg border border-accent-400/20">
+                      <span className="text-muted-400 text-[10px] uppercase block mb-0.5">Dip Angle</span>
+                      <span className="font-mono font-bold text-white">{recommendation.dipAngle}</span>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center bg-navy-800/80 p-2.5 rounded-lg border border-navy-700/60 mt-2">
-                    <span className="text-slate-400">Estimated Mn Grade:</span>
+                  <div className="flex justify-between items-center bg-card-bg p-2.5 rounded-lg border border-accent-400/20 mt-2">
+                    <span className="text-muted-400">Estimated Mn Grade:</span>
                     <span className="font-mono font-bold text-green-400 text-sm">
                       {(recommendation.mnGrade - 1.2).toFixed(1)}% &ndash; {(recommendation.mnGrade + 2.4).toFixed(1)}%
                     </span>
                   </div>
   
-                  <div className="flex justify-between items-center bg-navy-800/80 p-2.5 rounded-lg border border-navy-700/60">
-                    <span className="text-slate-400">Confidence Score:</span>
-                    <span className="font-mono font-bold text-cyan-300 text-sm">
+                  <div className="flex justify-between items-center bg-card-bg p-2.5 rounded-lg border border-accent-400/20">
+                    <span className="text-muted-400">Confidence Score:</span>
+                    <span className="font-mono font-bold text-accent-400 text-sm">
                       {(recommendation.confidenceScore * 100).toFixed(0)}%
                     </span>
                   </div>
@@ -503,127 +503,126 @@ export const ReserveMap: React.FC = () => {
           )}
       </Map>
 
-      {/* FLOATING UI PANELS OVER THE SATELLITE BASEMAP */}
-      <div className="absolute inset-0 pointer-events-none p-5 flex flex-col justify-between z-10">
+        {/* FLOATING UI PANELS - SPACE TECH TELEMETRY HUD */}
+      <div className="absolute inset-0 pointer-events-none p-6 flex flex-col justify-between z-10">
         
-        {/* TOP ROW: SITE SWITCHER & LAYER CONTROLS */}
+        {/* CENTER CROSSHAIRS */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center opacity-60">
+          <div className="w-48 h-px bg-accent-400/40 absolute"></div>
+          <div className="w-px h-48 bg-accent-400/40 absolute"></div>
+          <div className="w-10 h-10 border border-accent-400/80 rounded-full relative">
+            <div className="absolute -top-1 left-1/2 w-1 h-2 bg-accent-400 -translate-x-1/2"></div>
+            <div className="absolute -bottom-1 left-1/2 w-1 h-2 bg-accent-400 -translate-x-1/2"></div>
+            <div className="absolute top-1/2 -left-1 w-2 h-1 bg-accent-400 -translate-y-1/2"></div>
+            <div className="absolute top-1/2 -right-1 w-2 h-1 bg-accent-400 -translate-y-1/2"></div>
+          </div>
+          <span className="absolute -bottom-6 font-mono text-[10px] text-accent-400">
+            {currentSite.lat.toFixed(5)} N, {currentSite.lng.toFixed(5)} E
+          </span>
+        </div>
+
+        {/* TOP HUD: SITE & SENSOR CONTROLS */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          
-          {/* Top-Left: Site Selector Dropdown */}
-          <div className="bg-navy-900/90 backdrop-blur-md border border-navy-700/80 p-3 rounded-2xl shadow-2xl pointer-events-auto flex items-center gap-3">
-            <div className="p-2 bg-teal-500/10 border border-teal-500/30 rounded-xl text-teal-400">
-              <Compass size={18} />
+          {/* Site Selector HUD */}
+          <div className="glass-panel p-4 pointer-events-auto w-72">
+            <div className="flex items-center gap-2 border-b border-accent-400/20 pb-2 mb-3">
+              <Target size={16} className="text-accent-400" />
+              <span className="telemetry-label">Orbital Lock</span>
             </div>
-            <div>
-              <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block">Active Mine Site</span>
-              <div className="relative mt-0.5">
-                <select
-                  value={selectedSiteId}
-                  onChange={(e) => handleSiteChange(e.target.value)}
-                  className="appearance-none bg-navy-800 border border-navy-700 text-teal-300 font-bold text-sm py-1 pl-2.5 pr-8 rounded-lg focus:outline-none focus:border-teal-400 cursor-pointer transition-colors"
-                >
-                  <option value="balaghat">Balaghat Complex (MP)</option>
-                  <option value="gumgaon">Gumgaon Mine (MH)</option>
-                  <option value="kandri">Kandri Mine (MH)</option>
-                </select>
-                <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-teal-400 pointer-events-none" />
-              </div>
+            <div className="relative">
+              <select
+                value={selectedSiteId}
+                onChange={(e) => handleSiteChange(e.target.value)}
+                className="appearance-none w-full bg-app-bg border border-accent-400/30 text-accent-400 font-mono text-sm py-2 pl-3 pr-8 focus:outline-none focus:border-accent-400 cursor-pointer transition-colors"
+              >
+                <option value="balaghat">BALAGHAT_COMPLEX_01</option>
+                <option value="gumgaon">GUMGAON_SECTOR_05</option>
+                <option value="kandri">KANDRI_DEEP_VEIN</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-accent-400 pointer-events-none" />
             </div>
-            <div className="hidden sm:block pl-3 border-l border-navy-700 text-[10px] font-mono text-slate-400">
-              <span>{currentSite.lat.toFixed(4)}° N, {currentSite.lng.toFixed(4)}° E</span>
+            <div className="grid grid-cols-2 gap-2 mt-3 text-[10px] font-mono text-accent-400/60">
+              <div>AZIMUTH: {(currentSite.strikeTrend || 0).toFixed(1)}°</div>
+              <div className="text-right">ALT: 18,400km</div>
             </div>
           </div>
 
-          {/* Top-Right: Map Layers Controls */}
-          <div className="bg-navy-900/90 backdrop-blur-md border border-navy-700/80 p-4 rounded-2xl shadow-2xl w-64 pointer-events-auto">
-            <div className="flex items-center gap-2 mb-3 text-teal-400">
-              <Layers size={16} />
-              <h3 className="font-bold text-xs tracking-wider uppercase">Map Layers</h3>
-            </div>
-            <div className="space-y-2.5 text-xs">
-              <label className="flex items-center gap-2.5 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  checked={showComposite} 
-                  onChange={(e) => setShowComposite(e.target.checked)} 
-                  className="accent-teal-500 w-4 h-4 cursor-pointer rounded" 
-                />
-                <span className="text-slate-200 group-hover:text-white transition-colors">
-                  Mineral Composite (RGB)
-                </span>
-              </label>
-              <label className="flex items-center gap-2.5 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  checked={showMarkers} 
-                  onChange={(e) => setShowMarkers(e.target.checked)} 
-                  className="accent-teal-500 w-4 h-4 cursor-pointer rounded" 
-                />
-                <span className="text-slate-200 group-hover:text-white transition-colors">
-                  Ore Grade Markers (Mn)
-                </span>
-              </label>
-              <label className="flex items-center gap-2.5 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  checked={showRecommendation} 
-                  onChange={(e) => setShowRecommendation(e.target.checked)} 
-                  className="accent-teal-500 w-4 h-4 cursor-pointer rounded" 
-                />
-                <span className="text-slate-200 group-hover:text-white transition-colors">
-                  Recommended Drill Site
-                </span>
-              </label>
-            </div>
+          {/* Layer Toggle HUD */}
+          <div className="glass-panel p-4 pointer-events-auto flex flex-col gap-3 w-64">
+            <span className="telemetry-label border-b border-accent-400/20 pb-2">Sensor Array</span>
+            <label className="flex items-center justify-between cursor-pointer group font-mono text-xs">
+              <span className="text-pink-400 group-hover:text-pink-500 transition-colors">SAR (Manganese)</span>
+              <input type="checkbox" checked={showComposite} onChange={(e) => setShowComposite(e.target.checked)} className="accent-pink-500" />
+            </label>
+            <label className="flex items-center justify-between cursor-pointer group font-mono text-xs">
+              <span className="text-green-400 group-hover:text-green-500 transition-colors">NDVI (Vegetation)</span>
+              <input type="checkbox" checked={showMarkers} onChange={(e) => setShowMarkers(e.target.checked)} className="accent-green-500" />
+            </label>
+            <label className="flex items-center justify-between cursor-pointer group font-mono text-xs">
+              <span className="text-accent-400 group-hover:text-accent-500 transition-colors">LiDAR (Elevation)</span>
+              <input type="checkbox" checked={showRecommendation} onChange={(e) => setShowRecommendation(e.target.checked)} className="accent-accent-400" />
+            </label>
           </div>
         </div>
 
-        {/* BOTTOM ROW: MOIL GRADE STANDARDS LEGEND */}
-        <div className="self-end bg-navy-900/90 backdrop-blur-md border border-navy-700/80 p-4 rounded-2xl shadow-2xl w-80 pointer-events-auto">
-          <h3 className="font-bold text-xs tracking-wider text-slate-200 mb-3 uppercase flex items-center gap-2">
-            <Info size={15} className="text-teal-400" /> MOIL Grade Standards
-          </h3>
+        {/* BOTTOM HUD: SLIDERS & ELEVATION */}
+        <div className="flex flex-col md:flex-row items-end justify-between gap-4">
           
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-200">
-                <Circle size={14} className="fill-green-500 text-green-400 shrink-0 shadow-sm" />
-                <span className="font-medium">Ferro Grade</span>
+          {/* Spectral Wavelength Sliders */}
+          <div className="glass-panel p-4 pointer-events-auto w-72">
+            <span className="telemetry-label block border-b border-accent-400/20 pb-2 mb-4">Spectral Calibration</span>
+            <div className="space-y-4 font-mono text-[10px] text-accent-400">
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>SWIR (2.1 - 2.3 µm)</span>
+                  <span>78%</span>
+                </div>
+                <div className="h-1 bg-app-bg border border-accent-400/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-pink-500 w-[78%]"></div>
+                </div>
               </div>
-              <span className="font-mono text-xs font-bold text-green-400">&ge; 44% Mn</span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-200">
-                <Triangle size={14} className="fill-amber-500 text-amber-400 shrink-0 shadow-sm" />
-                <span className="font-medium">SMGR Grade</span>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>VNIR (0.4 - 1.0 µm)</span>
+                  <span>42%</span>
+                </div>
+                <div className="h-1 bg-app-bg border border-accent-400/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-500 w-[42%]"></div>
+                </div>
               </div>
-              <span className="font-mono text-xs font-bold text-amber-400">30&ndash;43% Mn</span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-200">
-                <Diamond size={13} className="text-red-400 fill-red-900/60 shrink-0" />
-                <span className="font-medium">Blast Furnace Grade</span>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>Thermal (8 - 14 µm)</span>
+                  <span>91%</span>
+                </div>
+                <div className="h-1 bg-app-bg border border-accent-400/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-accent-400 w-[91%]"></div>
+                </div>
               </div>
-              <span className="font-mono text-xs font-bold text-red-400">&lt; 30% Mn</span>
             </div>
           </div>
 
-          <div className="mt-3.5 pt-3 border-t border-navy-700/80 space-y-1.5">
-            <div className="flex items-center gap-2 text-[11px] text-teal-300">
-              <span className="w-3.5 h-0 border-t-2 border-dashed border-teal-400 shrink-0" />
-              <span className="font-medium truncate">{currentSite.corridorName}</span>
+          {/* LiDAR Elevation Profile Mock */}
+          <div className="glass-panel p-4 pointer-events-auto w-80 h-32 flex flex-col">
+            <div className="flex justify-between items-center border-b border-accent-400/20 pb-2 mb-2">
+              <span className="telemetry-label">Elevation Profile (LiDAR)</span>
+              <span className="font-mono text-[10px] text-accent-400">SECTOR {currentSite.id.substring(0,3).toUpperCase()}</span>
             </div>
-            <p className="text-[9px] text-slate-400 leading-tight">
-              Grade thresholds per MOIL published pricing/grade standards (Mn-44% and above = Ferro grade).
-            </p>
+            <div className="flex-1 relative overflow-hidden flex items-end border-l border-b border-accent-400/30">
+              <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+                <path d="M0,100 L0,70 L10,65 L20,80 L35,50 L50,45 L65,60 L80,20 L90,15 L100,25 L100,100 Z" fill="rgba(0, 240, 255, 0.1)" stroke="#00F0FF" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+                <path d="M65,60 L80,20 L90,15" stroke="#D946EF" strokeWidth="2.5" vectorEffect="non-scaling-stroke" fill="none" />
+              </svg>
+              <div className="absolute top-2 right-4 bg-app-bg/80 px-1 border border-pink-500 font-mono text-[8px] text-pink-400">
+                Mn EXPOSURE DETECTED
+              </div>
+            </div>
           </div>
+
         </div>
 
       </div>
 
-      {/* Global CSS for custom transparent maplibre popup styling */}
       <style>{`
         .maplibregl-popup-content {
           background: transparent !important;
@@ -631,7 +630,7 @@ export const ReserveMap: React.FC = () => {
           box-shadow: none !important;
         }
         .maplibregl-popup-tip {
-          border-top-color: rgba(15, 23, 42, 0.95) !important;
+          border-top-color: rgba(11, 15, 25, 0.95) !important;
         }
       `}</style>
     </motion.div>
