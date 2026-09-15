@@ -46,18 +46,19 @@ export const Recommendations: React.FC = () => {
   if (loading) return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8">
       <SkeletonBar className="h-5 w-32" />
-      <div className="bg-navy-800 border border-navy-700 rounded-xl p-6 space-y-3">
+      <div className="glass-card p-6 space-y-3">
         <SkeletonBar className="h-6 w-56" />
         <SkeletonBar className="h-4 w-full" />
         <SkeletonBar className="h-4 w-3/4" />
       </div>
-      <div className="bg-navy-800 border border-navy-700 rounded-xl p-6 space-y-3">
+      <div className="glass-card p-6 space-y-3">
         <SkeletonBar className="h-5 w-48" />
         <SkeletonBar className="h-4 w-full" />
         <SkeletonBar className="h-8 w-32" />
       </div>
     </div>
   );
+  
   if (error) return <ErrorState message={error} onRetry={fetchRecs} />;
 
   return (
@@ -65,18 +66,21 @@ export const Recommendations: React.FC = () => {
       variants={motionPresets.fadeIn}
       initial="initial"
       animate="animate"
-      className="p-6 md:p-8 max-w-4xl mx-auto space-y-8"
+      className="p-6 md:p-8 max-w-4xl mx-auto space-y-8 relative z-10"
     >
-      <button onClick={() => navigate('/alerts')} className="flex items-center gap-2 text-slate-400 hover:text-teal-400 transition-colors text-sm">
-        <ArrowLeft size={18} /> Back to Alerts
+      <button onClick={() => navigate('/alerts')} className="flex items-center gap-2 text-accent-400/70 hover:text-accent-400 transition-colors text-[11px] font-semibold tracking-[0.2em] uppercase">
+        <ArrowLeft size={16} /> Back to Alerts
       </button>
 
-      <header className="bg-amber-500/10 border border-amber-500/50 rounded-xl p-5 md:p-6 flex items-start gap-4">
-        <ShieldAlert className="text-amber-500 shrink-0 mt-1" size={28} />
+      <header className="glass-card-amber p-5 md:p-6 flex items-start gap-4 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-amber-400/50 shadow-[0_0_10px_rgba(251,191,36,0.8)]" />
+        <ShieldAlert className="text-amber-400 shrink-0 mt-1 drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]" size={28} />
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-amber-500">HUMAN APPROVAL REQUIRED</h1>
-          <p className="text-slate-300 mt-2 text-sm md:text-lg leading-relaxed">
-            🚨 <strong className="text-white">NO AUTOMATIC ACTION TAKEN.</strong> The system has generated the following mitigation strategies for this risk. Review the estimated impacts and explicitly approve or reject them to update the operational plan.
+          <h1 className="text-xl md:text-2xl font-bold text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] tracking-wide uppercase">
+            HUMAN APPROVAL REQUIRED
+          </h1>
+          <p className="text-amber-400/80 mt-2 text-sm md:text-base leading-relaxed">
+            <span className="text-amber-400 font-bold tracking-wider">&gt; NO AUTOMATIC ACTION TAKEN.</span> The system has generated the following mitigation strategies for this risk. Review the estimated impacts and explicitly approve or reject them to update the operational plan.
           </p>
         </div>
       </header>
@@ -98,14 +102,22 @@ export const Recommendations: React.FC = () => {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className={`bg-navy-800 border rounded-xl p-5 md:p-6 shadow-lg transition-colors duration-300 ${isResolved ? 'border-teal-500/30' : 'border-navy-700'}`}
+                className={`glass-panel p-5 md:p-6 transition-colors duration-300 ${isResolved ? 'border-accent-400/50 shadow-[0_0_15px_rgba(243,195,84,0.1)]' : 'border-accent-400/10'}`}
               >
                 <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 md:gap-6">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg md:text-xl font-bold text-slate-100">{rec.title}</h3>
-                    <p className="text-slate-400 mt-2 text-sm md:text-base">{rec.description}</p>
-                    <div className="mt-4 inline-block bg-teal-500/20 text-teal-400 px-3 py-1 rounded-md text-sm font-mono border border-teal-500/30">
-                      Impact: {rec.estimatedImpact}
+                    <h3 className="text-lg md:text-xl font-bold text-white tracking-wide">{rec.title}</h3>
+                    <p className="text-muted-400 mt-2 text-sm md:text-base leading-relaxed">{rec.description}</p>
+                    <div 
+                      className="mt-4 inline-block px-3 py-1.5 rounded text-[10px] font-semibold tracking-[0.15em] uppercase"
+                      style={{
+                        background: 'rgba(243,195,84,0.1)',
+                        color: '#F3C354',
+                        border: '1px solid rgba(243,195,84,0.3)',
+                        boxShadow: 'inset 0 0 8px rgba(243,195,84,0.1)'
+                      }}
+                    >
+                      Est. Impact: {rec.estimatedImpact}
                     </div>
                   </div>
                   
@@ -116,25 +128,25 @@ export const Recommendations: React.FC = () => {
                           key="resolved"
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="flex items-center md:justify-end gap-2 text-teal-400 font-bold"
+                          className="flex items-center md:justify-end gap-2 text-accent-400 font-bold tracking-wider drop-shadow-[0_0_5px_rgba(243,195,84,0.5)] uppercase text-sm"
                         >
-                          <CheckCircle size={24} /> {rec.status}
+                          <CheckCircle size={18} /> {rec.status}
                         </motion.div>
                       ) : (
                         <motion.div key="pending" className="flex flex-row md:flex-col gap-3">
                           <button 
                             onClick={() => handleDecision(rec.id, 'ACCEPTED')}
                             disabled={processingId === rec.id}
-                            className="bg-teal-500 hover:bg-teal-400 active:scale-[0.97] text-navy-900 font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-all flex-1 md:flex-none text-sm md:text-base"
+                            className="bg-accent-400/10 border border-accent-400/50 hover:bg-accent-400/20 active:scale-[0.97] text-accent-400 font-bold py-2.5 px-4 rounded-lg shadow-[inset_0_0_10px_rgba(243,195,84,0.2)] flex items-center justify-center gap-2 disabled:opacity-50 transition-all flex-1 md:flex-none text-[11px] tracking-[0.15em] uppercase"
                           >
-                            {processingId === rec.id ? 'Processing...' : <><Check size={18} /> Accept Action</>}
+                            {processingId === rec.id ? 'Processing...' : <><Check size={16} /> Execute</>}
                           </button>
                           <button 
                             onClick={() => handleDecision(rec.id, 'REJECTED')}
                             disabled={processingId === rec.id}
-                            className="bg-transparent border border-danger-500 text-danger-500 hover:bg-danger-500/10 active:scale-[0.97] font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-all flex-1 md:flex-none text-sm md:text-base"
+                            className="bg-danger-500/5 border border-danger-500/30 text-danger-500 hover:bg-danger-500/10 active:scale-[0.97] font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-all flex-1 md:flex-none text-[11px] tracking-[0.15em] uppercase"
                           >
-                            <XCircle size={18} /> Reject
+                            <XCircle size={16} /> Discard
                           </button>
                         </motion.div>
                       )}

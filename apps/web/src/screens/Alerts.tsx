@@ -43,13 +43,13 @@ export const Alerts: React.FC = () => {
       variants={motionPresets.slideUp}
       initial="initial"
       animate="animate"
-      className="p-6 md:p-8 max-w-4xl mx-auto space-y-6"
+      className="p-6 md:p-8 max-w-4xl mx-auto space-y-6 relative z-10"
     >
       <header>
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-100 flex items-center gap-3">
-          <Activity className="text-amber-500 shrink-0" /> Active Risk Alerts
+        <h1 className="text-2xl md:text-3xl font-bold text-teal-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.5)] tracking-wide uppercase flex items-center gap-3">
+          <Activity className="text-amber-400 shrink-0 drop-shadow-[0_0_5px_rgba(255,176,32,0.8)]" /> Active Risk Alerts
         </h1>
-        <p className="text-slate-400 mt-2 text-sm md:text-base">Ranked shortfalls and operational risks requiring attention.</p>
+        <p className="text-teal-400/60 font-mono mt-2 text-sm md:text-base uppercase tracking-widest">Ranked shortfalls and operational risks requiring attention.</p>
       </header>
 
       <div className="space-y-4 mt-8">
@@ -74,25 +74,25 @@ export const Alerts: React.FC = () => {
                     : { opacity: 1, y: 0, scale: 1 }
                 }
                 transition={{ delay: index * 0.08 }}
-                className={`bg-navy-800 border rounded-xl overflow-hidden shadow-lg transition-colors duration-300 ${isCritical ? 'border-danger-500/50' : 'border-amber-500/50'}`}
+                className={`glass-panel overflow-hidden transition-colors duration-300 ${isCritical ? 'border-danger-500/50 shadow-[0_0_15px_rgba(255,51,102,0.15)]' : 'border-amber-500/50 shadow-[0_0_15px_rgba(255,176,32,0.1)]'}`}
               >
                 <div 
-                  className="p-4 md:p-6 cursor-pointer flex items-center justify-between hover:bg-navy-700/50 transition-colors"
+                  className="p-4 md:p-6 cursor-pointer flex items-center justify-between hover:bg-teal-500/5 transition-colors"
                   onClick={() => setExpandedId(isExpanded ? null : alert.id)}
                 >
                   <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                    <div className={`p-2.5 md:p-3 rounded-full shrink-0 ${isCritical ? 'bg-danger-500/20 text-danger-500' : 'bg-amber-500/20 text-amber-500'}`}>
+                    <div className={`p-2.5 md:p-3 rounded-full shrink-0 shadow-[inset_0_0_8px_currentColor] border ${isCritical ? 'bg-danger-500/10 text-danger-500 border-danger-500/30' : 'bg-amber-500/10 text-amber-500 border-amber-500/30'}`}>
                       <AlertTriangle size={20} />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-base md:text-xl font-bold text-slate-100 truncate">{alert.title}</h3>
-                      <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm mt-1">
-                        <span className={isCritical ? 'text-danger-400' : 'text-amber-400'}>{alert.severity}</span>
-                        <span className="text-slate-400">Lead time: {alert.leadTimeDays} days</span>
+                      <h3 className="text-base md:text-xl font-bold text-slate-200 tracking-wide truncate">{alert.title}</h3>
+                      <div className="flex flex-wrap gap-2 md:gap-4 font-mono text-xs md:text-sm mt-1">
+                        <span className={`tracking-wider ${isCritical ? 'text-danger-400 drop-shadow-[0_0_2px_rgba(255,51,102,0.8)]' : 'text-amber-400 drop-shadow-[0_0_2px_rgba(255,176,32,0.8)]'}`}>{alert.severity}</span>
+                        <span className="text-teal-400/50">Lead time: {alert.leadTimeDays} days</span>
                       </div>
                     </div>
                   </div>
-                  <ChevronRight size={20} className={`text-slate-400 transition-transform duration-200 shrink-0 ml-2 ${isExpanded ? 'rotate-90' : ''}`} />
+                  <ChevronRight size={20} className={`text-teal-400/70 transition-transform duration-200 shrink-0 ml-2 ${isExpanded ? 'rotate-90' : ''}`} />
                 </div>
 
                 <AnimatePresence>
@@ -102,27 +102,27 @@ export const Alerts: React.FC = () => {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
-                      className="border-t border-navy-700 bg-navy-900/50 overflow-hidden"
+                      className="border-t border-teal-500/20 bg-navy-950/50 overflow-hidden"
                     >
                       <div className="p-4 md:p-6 space-y-6">
                         <div>
-                          <h4 className="text-sm font-mono text-slate-400 uppercase tracking-widest mb-3">Cause Breakdown</h4>
-                          <div className="h-4 w-full bg-navy-700 rounded-full overflow-hidden flex">
+                          <h4 className="telemetry-label mb-3">Cause Breakdown</h4>
+                          <div className="h-4 w-full bg-navy-900 rounded-full overflow-hidden flex border border-teal-500/10">
                             {alert.causeBreakdown.map((cause, idx) => (
                               <motion.div 
                                 key={idx}
                                 initial={{ width: 0 }}
                                 animate={{ width: `${cause.percentage}%` }}
                                 transition={{ duration: 0.6, delay: idx * 0.15 }}
-                                className={`h-full ${idx === 0 ? 'bg-amber-500' : idx === 1 ? 'bg-teal-500' : 'bg-slate-400'}`}
+                                className={`h-full border-r border-navy-950 last:border-none ${idx === 0 ? 'bg-amber-500 shadow-[0_0_10px_rgba(255,176,32,0.8)]' : idx === 1 ? 'bg-teal-500 shadow-[0_0_10px_rgba(0,240,255,0.8)]' : 'bg-violet-500 shadow-[0_0_10px_rgba(176,38,255,0.8)]'}`}
                                 title={`${cause.cause} (${cause.percentage}%)`}
                               />
                             ))}
                           </div>
-                          <div className="flex flex-wrap gap-3 md:gap-4 mt-3">
+                          <div className="flex flex-wrap gap-3 md:gap-4 mt-4 font-mono">
                             {alert.causeBreakdown.map((cause, idx) => (
-                              <div key={idx} className="flex items-center gap-2 text-xs md:text-sm text-slate-300">
-                                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${idx === 0 ? 'bg-amber-500' : idx === 1 ? 'bg-teal-500' : 'bg-slate-400'}`} />
+                              <div key={idx} className="flex items-center gap-2 text-xs md:text-sm text-teal-300">
+                                <span className={`w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_5px_currentColor] ${idx === 0 ? 'bg-amber-500' : idx === 1 ? 'bg-teal-500' : 'bg-violet-500'}`} />
                                 {cause.cause} ({cause.percentage}%)
                               </div>
                             ))}
@@ -132,7 +132,7 @@ export const Alerts: React.FC = () => {
                         <div className="pt-2 flex justify-end">
                           <Link 
                             to={`/recommendations?alertId=${alert.id}`}
-                            className="bg-teal-500 hover:bg-teal-400 active:scale-[0.97] text-navy-900 font-bold px-5 md:px-6 py-2 rounded-lg transition-all flex items-center gap-2 text-sm md:text-base"
+                            className="bg-teal-500/10 border border-teal-500/30 hover:bg-teal-500/20 active:scale-[0.97] text-teal-400 font-bold px-5 md:px-6 py-2 rounded-lg transition-all flex items-center gap-2 text-sm md:text-base tracking-wide shadow-[inset_0_0_10px_rgba(0,240,255,0.1)]"
                           >
                             See Recommendations <ChevronRight size={18} />
                           </Link>
