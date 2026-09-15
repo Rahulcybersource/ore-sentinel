@@ -15,6 +15,7 @@ export interface MapLayerState {
   isroFaults: boolean;
   sentinelIronOxide: boolean;
   nasaHyperspectral: boolean;
+  subsurfaceBlock: boolean;
 }
 
 export interface Adapters {
@@ -34,6 +35,7 @@ export const AdapterProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isroFaults: true,
     sentinelIronOxide: true,
     nasaHyperspectral: true,
+    subsurfaceBlock: true
   });
 
   const adapters = useMemo(() => {

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import DeckGL from '@deck.gl/react';
-import { PointCloudLayer } from '@deck.gl/layers';
+import { getSubsurfaceBlockLayers } from './ReserveMap/layers/SubsurfaceBlockLayer';
 import { useAdapters } from '../data/adapters/AdapterContext';
 import type { ReserveCell } from '../data/types/models';
 import { motion } from 'framer-motion';
@@ -149,7 +149,10 @@ export const ReserveMap: React.FC = () => {
     vedasFaults:  mapLayers.isroFaults,
     sentinelIron: mapLayers.sentinelIronOxide,
     nasaMn:       mapLayers.nasaHyperspectral,
+    subsurfaceBlock: mapLayers.subsurfaceBlock
   };
+
+  const [depthRange, setDepthRange] = useState<[number, number]>([0, 350]);
 
   // Fetch reserve data for selected site
   const fetchData = useCallback(async () => {
@@ -352,21 +355,11 @@ export const ReserveMap: React.FC = () => {
   }
 
   // Z-LEVEL 1: 3D SUBSURFACE VOXELS (Deck.GL PointCloud)
-  const deckLayers = [
-    new PointCloudLayer({
-      id: 'subsurface-assays',
-      data: processedGrid,
-      getPosition: (d: any) => [d.realLng, d.realLat, -d.depthMeters],
-      getColor: (d: any) => 
-        d.mnGrade >= 44 ? [16, 185, 129] : 
-        d.mnGrade >= 30 ? [245, 158, 11] : 
-        [236, 72, 153],
-      getNormal: [0, 0, 1],
-      pointSize: 15,
-      sizeUnits: 'meters',
-      visible: true
-    })
-  ];
+  const deckLayers = getSubsurfaceBlockLayers({
+    data: processedGrid,
+    depthRange,
+    visible: activeLayers.subsurfaceBlock,
+  });
 
   return (
     <motion.div 
@@ -387,6 +380,11 @@ export const ReserveMap: React.FC = () => {
         }}
         controller={true}
         layers={deckLayers}
+        getTooltip={({object}: any) => {
+          if (!object) return null;
+          if (object.coordinates) return "TARGET: 125m Depth | 49.2% Mn | Dip: 65°N";
+          return `Depth: ${Math.round(object.depthMeters)}m | ${Math.round(object.mnGrade * 10)/10}% Mn`;
+        }}
         style={{ width: '100%', height: '100%' }}
       >
         <Map
@@ -476,6 +474,24 @@ export const ReserveMap: React.FC = () => {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* ── RIGHT HUD: DEPTH SLICER ── */}
+      <div className="absolute top-16 right-[290px] z-10 pointer-events-auto h-[400px] w-16 bg-navy-950/80 backdrop-blur-md border border-cyan-500/30 rounded-[30px] flex flex-col items-center py-6 shadow-2xl">
+        <span className="text-[10px] text-cyan-400 font-bold mb-3 font-mono">0m</span>
+        <div className="relative flex-1 w-full flex items-center justify-center">
+          {/* Native range input rotated vertically */}
+          <input 
+            type="range"
+            min="0"
+            max="350"
+            value={depthRange[1]}
+            onChange={(e) => setDepthRange([0, parseInt(e.target.value)])}
+            className="absolute w-[280px] h-1 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 appearance-none bg-cyan-900/40 rounded-full cursor-pointer hover:bg-cyan-800/60 transition-colors [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-navy-900 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(34,211,238,0.6)]"
+          />
+        </div>
+        <span className="text-[10px] text-cyan-400 font-bold mt-3 font-mono">350m</span>
+        <div className="mt-2 text-[9px] text-cyan-500/60 font-mono text-center leading-tight">DEPTH<br/>SLICE</div>
       </div>
 
       {/* ── RIGHT PANEL: Advanced Layers + Assay Legend ── */}
