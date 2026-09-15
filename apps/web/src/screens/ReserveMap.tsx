@@ -417,110 +417,161 @@ export const ReserveMap: React.FC = () => {
       </Map>
 
       {/* ════════════════════════════════════════════════════════════════
-          FLOATING UI PANELS (positioned absolute, z-10 above map)
+          FLOATING UI PANELS — matches Balaghat reference layout
           ════════════════════════════════════════════════════════════ */}
-      <div className="absolute inset-0 pointer-events-none p-5 flex flex-col justify-between z-10">
-        
-        {/* TOP ROW: SITE SWITCHER & ADVANCED LAYER CONTROLS */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          {/* Site Selector HUD */}
-          <div className="glass-panel p-4 pointer-events-auto w-72">
-            <div className="flex items-center gap-2 border-b border-accent-400/20 pb-2 mb-3">
-              <Target size={16} className="text-accent-400" />
-              <span className="telemetry-label">Orbital Lock</span>
-            </div>
-            <div className="relative">
-              <select
-                value={selectedSiteId}
-                onChange={(e) => handleSiteChange(e.target.value)}
-                className="appearance-none w-full bg-app-bg border border-accent-400/30 text-accent-400 font-mono text-sm py-2 pl-3 pr-8 focus:outline-none focus:border-accent-400 cursor-pointer transition-colors"
-              >
-                <option value="balaghat">BALAGHAT_COMPLEX_01</option>
-                <option value="gumgaon">GUMGAON_SECTOR_05</option>
-                <option value="kandri">KANDRI_DEEP_VEIN</option>
-              </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-accent-400 pointer-events-none" />
-            </div>
-            <div className="grid grid-cols-2 gap-2 mt-3 text-[10px] font-mono text-accent-400/60">
-              <div>AZIMUTH: {(currentSite.strikeTrend || 0).toFixed(1)}°</div>
-              <div className="text-right">ALT: 18,400km</div>
-            </div>
+
+      {/* ── TOP BAR: Site name + Coordinates ── */}
+      <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none">
+        <div className="flex items-center justify-between px-5 py-3">
+          {/* Left: Site name badge */}
+          <div className="pointer-events-auto flex items-center gap-2 bg-navy-900/80 backdrop-blur-md border border-white/10 rounded-lg px-4 py-2">
+            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="text-sm font-medium text-slate-100">{currentSite.name}</span>
           </div>
 
-          {/* Layer Toggle HUD */}
-          <div className="glass-panel p-4 pointer-events-auto flex flex-col gap-3 w-64">
-            <span className="telemetry-label border-b border-accent-400/20 pb-2">Sensor Array</span>
-            <label className="flex items-center justify-between cursor-pointer group font-mono text-xs">
-              <span className="text-pink-400 group-hover:text-pink-500 transition-colors">SAR (Manganese)</span>
-              <input type="checkbox" checked={activeLayers.sentinelIron} onChange={(e) => adapters.toggleMapLayer('sentinelIronOxide', e.target.checked)} className="accent-pink-500" />
+          {/* Center: Site selector dropdown */}
+          <div className="pointer-events-auto relative">
+            <select
+              value={selectedSiteId}
+              onChange={(e) => handleSiteChange(e.target.value)}
+              className="appearance-none bg-navy-900/80 backdrop-blur-md border border-white/10 text-slate-100 font-medium text-sm py-2 pl-4 pr-10 rounded-lg focus:outline-none focus:border-cyan-500/50 cursor-pointer transition-colors"
+            >
+              <option value="balaghat">Balaghat Complex (MP)</option>
+              <option value="gumgaon">Gumgaon Mine (MH)</option>
+              <option value="kandri">Kandri (MH)</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          </div>
+
+          {/* Right: Coordinates display */}
+          <div className="pointer-events-auto flex items-center gap-2 bg-navy-900/80 backdrop-blur-md border border-white/10 rounded-lg px-4 py-2">
+            <Compass size={14} className="text-cyan-400" />
+            <span className="text-xs font-mono text-slate-300">
+              {currentSite.lat.toFixed(3)}° N, {currentSite.lng.toFixed(3)}° E
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── RIGHT PANEL: Advanced Layers + Assay Legend ── */}
+      <div className="absolute top-16 right-4 z-10 pointer-events-auto w-64 space-y-3 max-h-[calc(100%-120px)] overflow-y-auto">
+
+        {/* Advanced Layers Panel */}
+        <div className="bg-navy-900/85 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl">
+          <h3 className="text-xs font-bold text-slate-100 uppercase tracking-wider mb-4 flex items-center justify-between">
+            Advanced Layers
+            <Info size={14} className="text-slate-500" />
+          </h3>
+          <div className="space-y-3">
+            {/* ISRO Structural Faults */}
+            <label className="flex items-center justify-between cursor-pointer group">
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-0 border-t-2 border-dashed border-cyan-400 inline-block" />
+                <span className="text-xs text-slate-300 group-hover:text-white transition-colors">ISRO Structural Faults</span>
+              </div>
+              <div className={`w-9 h-5 rounded-full relative transition-colors cursor-pointer ${activeLayers.vedasFaults ? 'bg-cyan-500' : 'bg-slate-600'}`}
+                onClick={() => adapters.toggleMapLayer('isroFaults')}>
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${activeLayers.vedasFaults ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
             </label>
-            <label className="flex items-center justify-between cursor-pointer group font-mono text-xs">
-              <span className="text-green-400 group-hover:text-green-500 transition-colors">NDVI (Vegetation)</span>
-              <input type="checkbox" checked={activeLayers.vedasFaults} onChange={(e) => adapters.toggleMapLayer('isroFaults', e.target.checked)} className="accent-green-500" />
+
+            {/* NASA Hyperspectral Mn */}
+            <label className="flex items-center justify-between cursor-pointer group">
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-3 rounded-sm bg-gradient-to-r from-amber-500 via-emerald-500 to-pink-500 inline-block" />
+                <span className="text-xs text-slate-300 group-hover:text-white transition-colors">NASA Hyperspectral Mn</span>
+              </div>
+              <div className={`w-9 h-5 rounded-full relative transition-colors cursor-pointer ${activeLayers.nasaMn ? 'bg-cyan-500' : 'bg-slate-600'}`}
+                onClick={() => adapters.toggleMapLayer('nasaHyperspectral')}>
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${activeLayers.nasaMn ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
             </label>
-            <label className="flex items-center justify-between cursor-pointer group font-mono text-xs">
-              <span className="text-accent-400 group-hover:text-accent-500 transition-colors">LiDAR (Elevation)</span>
-              <input type="checkbox" checked={activeLayers.nasaMn} onChange={(e) => adapters.toggleMapLayer('nasaHyperspectral', e.target.checked)} className="accent-accent-400" />
+
+            {/* Sentinel Iron Oxide / Assay markers */}
+            <label className="flex items-center justify-between cursor-pointer group">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-emerald-500 border border-white/60 inline-block" />
+                <span className="text-xs text-slate-300 group-hover:text-white transition-colors">Mineral Corridor</span>
+              </div>
+              <div className={`w-9 h-5 rounded-full relative transition-colors cursor-pointer ${activeLayers.sentinelIron ? 'bg-cyan-500' : 'bg-slate-600'}`}
+                onClick={() => adapters.toggleMapLayer('sentinelIronOxide')}>
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${activeLayers.sentinelIron ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
             </label>
           </div>
         </div>
 
-        {/* BOTTOM HUD: SLIDERS & ELEVATION */}
-        <div className="flex flex-col md:flex-row items-end justify-between gap-4">
-          
-          {/* Spectral Wavelength Sliders */}
-          <div className="glass-panel p-4 pointer-events-auto w-72">
-            <span className="telemetry-label block border-b border-accent-400/20 pb-2 mb-4">Spectral Calibration</span>
-            <div className="space-y-4 font-mono text-[10px] text-accent-400">
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span>SWIR (2.1 - 2.3 µm)</span>
-                  <span>78%</span>
-                </div>
-                <div className="h-1 bg-app-bg border border-accent-400/30 rounded-full overflow-hidden">
-                  <div className="h-full bg-pink-500 w-[78%]"></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span>VNIR (0.4 - 1.0 µm)</span>
-                  <span>42%</span>
-                </div>
-                <div className="h-1 bg-app-bg border border-accent-400/30 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 w-[42%]"></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span>Thermal (8 - 14 µm)</span>
-                  <span>91%</span>
-                </div>
-                <div className="h-1 bg-app-bg border border-accent-400/30 rounded-full overflow-hidden">
-                  <div className="h-full bg-accent-400 w-[91%]"></div>
-                </div>
-              </div>
+        {/* Inspired Layers Info */}
+        <div className="bg-navy-900/85 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl">
+          <h3 className="text-xs font-bold text-slate-100 uppercase tracking-wider mb-3">ISRO VEDAS-inspired</h3>
+          <div className="space-y-2 text-[10px] text-slate-400">
+            <div className="flex items-center gap-2">
+              <span className="w-4 h-0 border-t-2 border-dashed border-cyan-400 inline-block" />
+              <span>ISRO VEDAS-inspired structural</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-4 h-0 border-t-2 border-dotted border-teal-400 inline-block" />
+              <span>Convex Hull of the mineral corridor</span>
             </div>
           </div>
-
-          {/* LiDAR Elevation Profile Mock */}
-          <div className="glass-panel p-4 pointer-events-auto w-80 h-32 flex flex-col">
-            <div className="flex justify-between items-center border-b border-accent-400/20 pb-2 mb-2">
-              <span className="telemetry-label">Elevation Profile (LiDAR)</span>
-              <span className="font-mono text-[10px] text-accent-400">SECTOR {currentSite.id.substring(0,3).toUpperCase()}</span>
-            </div>
-            <div className="flex-1 relative overflow-hidden flex items-end border-l border-b border-accent-400/30">
-              <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-                <path d="M0,100 L0,70 L10,65 L20,80 L35,50 L50,45 L65,60 L80,20 L90,15 L100,25 L100,100 Z" fill="rgba(0, 240, 255, 0.1)" stroke="#00F0FF" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-                <path d="M65,60 L80,20 L90,15" stroke="#D946EF" strokeWidth="2.5" vectorEffect="non-scaling-stroke" fill="none" />
-              </svg>
-              <div className="absolute top-2 right-4 bg-app-bg/80 px-1 border border-pink-500 font-mono text-[8px] text-pink-400">
-                Mn EXPOSURE DETECTED
-              </div>
-            </div>
-          </div>
-
         </div>
 
+        {/* Assay Points Legend */}
+        <div className="bg-navy-900/85 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl">
+          <h3 className="text-xs font-bold text-slate-100 uppercase tracking-wider mb-3 flex items-center justify-between">
+            Assay Points
+            <Info size={14} className="text-slate-500" />
+          </h3>
+
+          {/* Ferro Grade */}
+          <div className="mb-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ferro Grade</span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="w-3 h-3 rounded-full bg-emerald-500 border border-white/60 inline-block" />
+              <span className="text-[11px] text-slate-300">≥44% Ferro Grade</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,1 11,11 1,11" fill="#f59e0b" stroke="#fff" strokeWidth="0.8" /></svg>
+              <span className="text-[11px] text-slate-300">30%-43% SMGR Grade</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,1 11,6 6,11 1,6" fill="none" stroke="#ef4444" strokeWidth="1.2" /></svg>
+              <span className="text-[11px] text-slate-300">&lt;30% Blast Furnace Grade</span>
+            </div>
+          </div>
+
+          {/* Assay Points duplicated for reference clarity */}
+          <div className="border-t border-white/10 pt-2 mt-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assay Points</span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="w-3 h-3 rounded-full bg-emerald-500 border border-white/60 inline-block" />
+              <span className="text-[11px] text-slate-300">≥44% Ferro Grade</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,1 11,11 1,11" fill="#f59e0b" stroke="#fff" strokeWidth="0.8" /></svg>
+              <span className="text-[11px] text-slate-300">30%-43% SMGR Grade</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,1 11,6 6,11 1,6" fill="none" stroke="#ef4444" strokeWidth="1.2" /></svg>
+              <span className="text-[11px] text-slate-300">&lt;30% Blast Furnace Grade</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── BOTTOM BAR: Attribution ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
+        <div className="flex items-center justify-between px-5 py-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-slate-500 font-medium">⊕ MapLibre GL</span>
+          </div>
+          <span className="text-[9px] text-slate-500 italic">
+            Multispectral Mineral Composite Heatmap raster (Copernicus Sentinel-3/NASA EMIT inspired)
+          </span>
+          <span className="text-[9px] text-slate-500 pointer-events-auto cursor-pointer hover:text-slate-300 transition-colors">
+            Data Sources & Attribution
+          </span>
+        </div>
       </div>
 
       <style>{`
