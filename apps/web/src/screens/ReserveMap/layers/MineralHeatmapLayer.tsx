@@ -93,8 +93,10 @@ export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
       {/* ── Z-LEVEL 4: HEATMAP (confidence score KDE) ──────────────── */}
       <Source id="mineral-heatmap-source" type="geojson" data={geojsonData}>
         <Layer
-          id="mineral-heatmap-layer"
+          id="nasa-hyperspectral-heatmap"
           type="heatmap"
+          beforeId="waterway-label"
+          layout={{ visibility: visible ? 'visible' : 'none' }}
           paint={{
             'heatmap-weight': [
               'interpolate', ['linear'], ['get', 'confidenceScore'],
@@ -103,19 +105,18 @@ export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
             ],
             'heatmap-color': [
               'interpolate', ['linear'], ['heatmap-density'],
-              0, 'rgba(0, 0, 0, 0)',
-              0.2, '#00D9C0',
-              0.4, '#F59E0B',
-              0.7, '#10B981',
-              1.0, '#EC4899'
+              0, 'rgba(0,0,0,0)',
+              0.3, '#d97706',
+              0.6, '#10b981',
+              0.8, '#d946ef',
+              1.0, '#be185d'
             ],
             'heatmap-radius': [
               'interpolate', ['linear'], ['zoom'],
-              11, 20,
-              16, 80
+              10, 15,
+              15, 50
             ],
-            'heatmap-opacity': opacity,
-            'heatmap-opacity-transition': { duration: 300 }
+            'heatmap-opacity': 0.65
           }}
         />
       </Source>
@@ -144,7 +145,7 @@ export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
         </Marker>
       )}
 
-      {/* ── INTERACTIVE POPUP — FULL MOIL-COMPLIANT DRILL TARGET ────── */}
+      {/* ── INTERACTIVE POPUP — TARGET IDENTIFIED GAMIFIED CARD ────── */}
       {recommendation && showPopup && gradeInfo && factors && (
         <Popup 
           latitude={recommendation.lat} 
@@ -154,30 +155,19 @@ export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
           closeButton={false}
           offset={[0, -24]}
         >
-          <div className="bg-navy-900/95 border border-cyan-500/80 p-5 rounded-2xl shadow-2xl w-[340px] text-slate-100 backdrop-blur-md relative overflow-hidden">
-            {/* XP Notification */}
-            <AnimatePresence>
-              {showXpNotif && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="absolute top-2 right-3 flex items-center gap-1.5 bg-amber-500/20 border border-amber-400/60 px-2.5 py-1 rounded-lg z-20"
-                >
-                  <Zap size={12} className="text-amber-400 fill-amber-400" />
-                  <span className="text-[10px] font-mono font-bold text-amber-300">XP gained +500</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <div className="bg-navy-950/90 border border-cyan-500/30 p-5 rounded-2xl shadow-2xl w-[340px] text-slate-100 backdrop-blur-md relative overflow-hidden">
+            
+            {/* Subtle top glow line */}
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg,transparent,rgba(6,182,212,0.6),transparent)' }} />
 
             {/* Header */}
-            <div className="flex justify-between items-start mb-3 border-b border-navy-700/80 pb-2.5">
+            <div className="flex justify-between items-start mb-3 border-b border-cyan-500/20 pb-2.5">
               <div>
                 <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <Sparkles size={13} /> AI Exploration Target
+                  <Target size={13} className="text-cyan-400" /> TARGET IDENTIFIED
                 </span>
-                <h4 className="font-bold text-slate-100 text-sm mt-0.5">
-                  TARGET BH-34-GAMMA
+                <h4 className="font-bold text-cyan-300 text-sm mt-0.5 font-mono tracking-wide">
+                  REC-BH-GAMMA
                 </h4>
               </div>
               <button 
@@ -189,25 +179,28 @@ export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
             </div>
 
             <div className="space-y-2.5 text-xs">
-              {/* MOIL Standard + Grade */}
+              {/* Grade + Confidence */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-navy-950/80 p-2.5 rounded-lg border border-navy-700/60">
-                  <span className="text-slate-400 text-[10px] uppercase block mb-0.5">MOIL Standard</span>
-                  <span className={`font-mono font-bold ${gradeInfo.color}`}>
-                    {gradeInfo.label}
+                <div className="bg-navy-900/80 p-2.5 rounded-lg border border-cyan-500/20">
+                  <span className="text-slate-400 text-[10px] uppercase block mb-0.5">Grade</span>
+                  <span className="font-mono font-bold text-slate-100 text-sm">
+                    {recommendation.mnGrade.toFixed(1)}% Mn
                   </span>
                 </div>
-                <div className="bg-navy-950/80 p-2.5 rounded-lg border border-navy-700/60">
-                  <span className="text-slate-400 text-[10px] uppercase block mb-0.5">Mn Grade</span>
-                  <span className="font-mono font-bold text-slate-200">
-                    {recommendation.mnGrade.toFixed(1)}%
-                  </span>
+                <div className="bg-navy-900/80 p-2.5 rounded-lg border border-cyan-500/20">
+                  <span className="text-slate-400 text-[10px] uppercase block mb-0.5">Confidence</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-mono font-bold text-cyan-300 text-sm">
+                      {animatedScore.toFixed(0)}%
+                    </span>
+                    <span className={`text-[9px] font-mono ${gradeInfo.color}`}>{gradeInfo.label}</span>
+                  </div>
                 </div>
               </div>
 
               {/* Contributing Factors */}
-              <div className="bg-navy-950/80 p-2.5 rounded-lg border border-navy-700/60 space-y-1.5">
-                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Contributing Factors</span>
+              <div className="bg-navy-900/80 p-2.5 rounded-lg border border-cyan-500/20 space-y-1.5">
+                <span className="text-cyan-400/80 text-[10px] uppercase font-bold tracking-wider block">Contributing Factors</span>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-300">ISRO Fault Alignment</span>
                   <span className="font-mono font-bold text-cyan-300">[{factors.isroFault}%]</span>
@@ -224,20 +217,20 @@ export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
 
               {/* Depth + Dip */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-navy-800/80 p-2.5 rounded-lg border border-navy-700/60">
+                <div className="bg-navy-900/80 p-2.5 rounded-lg border border-cyan-500/20">
                   <span className="text-slate-400 text-[10px] uppercase block mb-0.5">Target Depth Range</span>
                   <span className="font-mono font-bold text-slate-200">{recommendation.targetDepth}</span>
                 </div>
-                <div className="bg-navy-800/80 p-2.5 rounded-lg border border-navy-700/60">
+                <div className="bg-navy-900/80 p-2.5 rounded-lg border border-cyan-500/20">
                   <span className="text-slate-400 text-[10px] uppercase block mb-0.5">Dip</span>
                   <span className="font-mono font-bold text-slate-200">{recommendation.dipAngle}</span>
                 </div>
               </div>
 
-              {/* Confidence Score Progress Bar */}
-              <div className="bg-navy-950/80 p-3 rounded-lg border border-cyan-500/30 mt-1">
+              {/* Confidence Progress Bar */}
+              <div className="bg-navy-900/80 p-3 rounded-lg border border-cyan-500/30 mt-1">
                 <div className="flex justify-between items-end mb-2">
-                  <span className="text-slate-400 uppercase text-[10px] font-bold tracking-wider">Confidence</span>
+                  <span className="text-slate-400 uppercase text-[10px] font-bold tracking-wider">AI Confidence</span>
                   <span className="font-mono font-bold text-cyan-300 text-sm">
                     {animatedScore.toFixed(0)}%
                   </span>
@@ -249,6 +242,21 @@ export const MineralHeatmapLayer: React.FC<MineralHeatmapLayerProps> = ({
                   />
                 </div>
               </div>
+
+              {/* Gamified XP Footer */}
+              <AnimatePresence>
+                {showXpNotif && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-400/40 px-3 py-2 rounded-lg"
+                  >
+                    <Zap size={14} className="text-emerald-400 fill-emerald-400" />
+                    <span className="text-sm font-mono font-bold text-emerald-400">XP gained +500</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </Popup>

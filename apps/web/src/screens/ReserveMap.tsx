@@ -19,6 +19,7 @@ import { ErrorState, SkeletonBar } from '../components/Skeletons';
 
 import { NATIONAL_MN_REGISTRY } from '../data/constants/mineRegistry';
 import { MineralHeatmapLayer } from './ReserveMap/layers/MineralHeatmapLayer';
+import { AssayMarkersLayer } from './ReserveMap/layers/AssayMarkersLayer';
 import { LayerController } from './ReserveMap/LayerController';
 import { evaluateDrillTarget } from '../utils/drillTargetEvaluator';
 
@@ -264,6 +265,10 @@ export const ReserveMap: React.FC = () => {
   const compositeFillLayer: any = {
     id: 'sentinel-iron-fill',
     type: 'fill',
+    beforeId: 'waterway-label',
+    layout: {
+      visibility: activeLayers.sentinelIron ? 'visible' : 'none'
+    },
     paint: {
       'fill-color': [
         'interpolate', ['linear'], ['get', 'probability'],
@@ -272,8 +277,7 @@ export const ReserveMap: React.FC = () => {
         0.7, 'rgba(245, 158, 11, 0.50)',
         1.0, 'rgba(239, 68, 68, 0.65)'
       ],
-      'fill-opacity': activeLayers.sentinelIron ? 0.85 : 0,
-      'fill-opacity-transition': { duration: 300 }
+      'fill-opacity': 0.85
     }
   };
 
@@ -281,11 +285,14 @@ export const ReserveMap: React.FC = () => {
   const compositeLineLayer: any = {
     id: 'sentinel-iron-lines',
     type: 'line',
+    beforeId: 'waterway-label',
+    layout: {
+      visibility: activeLayers.sentinelIron ? 'visible' : 'none'
+    },
     paint: {
       'line-color': 'rgba(255, 255, 255, 0.12)',
       'line-width': 1,
-      'line-opacity': activeLayers.sentinelIron ? 1 : 0,
-      'line-opacity-transition': { duration: 300 }
+      'line-opacity': 1
     }
   };
 
@@ -293,10 +300,13 @@ export const ReserveMap: React.FC = () => {
   const corridorFillLayer: any = {
     id: 'vedas-fault-fill',
     type: 'fill',
+    beforeId: 'waterway-label',
+    layout: {
+      visibility: activeLayers.vedasFaults ? 'visible' : 'none'
+    },
     paint: {
       'fill-color': '#00D9C0',
-      'fill-opacity': activeLayers.vedasFaults ? 0.12 : 0,
-      'fill-opacity-transition': { duration: 300 }
+      'fill-opacity': 0.12
     }
   };
 
@@ -304,12 +314,15 @@ export const ReserveMap: React.FC = () => {
   const corridorLineLayer: any = {
     id: 'vedas-fault-line',
     type: 'line',
+    beforeId: 'waterway-label',
+    layout: {
+      visibility: activeLayers.vedasFaults ? 'visible' : 'none'
+    },
     paint: {
-      'line-color': '#00D9C0',
-      'line-width': 2.5,
-      'line-dasharray': [4, 3],
-      'line-opacity': activeLayers.vedasFaults ? 1 : 0,
-      'line-opacity-transition': { duration: 300 }
+      'line-color': '#06b6d4',
+      'line-width': 3,
+      'line-dasharray': [4, 2],
+      'line-opacity': 0.8
     }
   };
 
@@ -387,6 +400,12 @@ export const ReserveMap: React.FC = () => {
             </div>
           </Marker>
         )}
+
+        {/* ── Z-LEVEL 3c: ASSAY MARKERS WITH MOIL GRADE ICONS ──────── */}
+        <AssayMarkersLayer 
+          gridData={processedGrid}
+          visible={activeLayers.sentinelIron}
+        />
 
         {/* ── Z-LEVEL 4+5: HEATMAP & DRILL TARGET AI (self-contained) ── */}
         <MineralHeatmapLayer 
