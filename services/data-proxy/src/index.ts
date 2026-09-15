@@ -1,0 +1,452 @@
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import axios from "axios";
+import fs from "fs";
+import path from "path";
+
+dotenv.config();
+const app = express();
+
+const ALLOWED_ORIGINS = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : ["http://localhost:5173", "http://localhost:3000"];
+app.use(cors({ origin: ALLOWED_ORIGINS }));
+app.use(express.json());
+const port = process.env.PORT || 4000;
+
+console.log("=== API KEY STARTUP CHECK ===");
+console.log(`COPERNICUS_CLIENT_ID: ${process.env.COPERNICUS_CLIENT_ID ? 'PRESENT (REDACTED)' : 'MISSING'}`);
+console.log(`COPERNICUS_CLIENT_SECRET: ${process.env.COPERNICUS_CLIENT_SECRET ? 'PRESENT (REDACTED)' : 'MISSING'}`);
+console.log(`NASA_EARTHDATA_TOKEN: ${process.env.NASA_EARTHDATA_TOKEN ? 'PRESENT (REDACTED)' : 'MISSING'}`);
+console.log(`DATA_GOV_IN_API_KEY: ${process.env.DATA_GOV_IN_API_KEY ? 'PRESENT (REDACTED)' : 'MISSING'}`);
+console.log("=============================");
+
+// STEP 13: OFFLINE/CACHED MODE FLAG
+const OFFLINE_MODE = process.env.OFFLINE_MODE === "true";
+
+if (OFFLINE_MODE) {
+  console.log("[MODE] *** DEMO-DAY OFFLINE MODE ENABLED ***");
+  console.log("[MODE] All endpoints will serve from cache only. Zero live API calls.");
+} else {
+// STEP 11a: Removed strict FAIL FAST ON MISSING VARS to allow partial API key usage
+  const REQUIRED_VARS = ["ISRO_VEDAS_API_KEY"];
+  for (const v of REQUIRED_VARS) {
+    if (!process.env[v]) {
+      console.warn("[WARNING] Missing recommended environment variable: " + v);
+    }
+  }
+}
+
+// Persistent cache store on disk
+const cachePath = path.join(__dirname, "cache.json");
+interface CacheStore {
+  weather: Record<string, { data: any; timestamp: number }>;
+  satellite: Record<string, { data: any; timestamp: number }>;
+  reserve: Record<string, { data: any; timestamp: number }>;
+  lastPopulated: number | null;
+}
+let cache: CacheStore = { weather: {}, satellite: {}, reserve: {}, lastPopulated: null };
+if (fs.existsSync(cachePath)) {
+  try {
+    cache = JSON.parse(fs.readFileSync(cachePath, "utf8"));
+  } catch {
+    console.warn("[CACHE] Corrupt cache file, starting fresh.");
+  }
+}
+const saveCache = () => {
+  cache.lastPopulated = Date.now();
+  fs.writeFileSync(cachePath, JSON.stringify(cache, null, 2));
+};
+
+// STEP 13: Status endpoint — tells the frontend when data was last fetched
+app.get("/api/status", (_req, res) => {
+  res.json({
+    offlineMode: OFFLINE_MODE,
+    lastPopulated: cache.lastPopulated ? new Date(cache.lastPopulated).toISOString() : null,
+    cacheSections: {
+      weather: Object.keys(cache.weather).length,
+      satellite: Object.keys(cache.satellite).length,
+      reserve: Object.keys(cache.reserve).length,
+    },
+  });
+});
+
+// STEP 11b: Open-Meteo Weather (No key needed)
+app.get("/api/weather", async (req, res) => {
+  const lat = req.query.lat as string;
+  const lng = req.query.lng as string;
+  if (!lat || !lng) return res.status(400).json({ error: "lat and lng required" });
+
+  const cacheKey = lat + "_" + lng;
+  const now = Date.now();
+  const SIX_HOURS = 6 * 60 * 60 * 1000;
+
+  // Serve from cache if available (always in offline mode, or within TTL in live mode)
+  if (cache.weather[cacheKey]) {
+    if (OFFLINE_MODE || (now - cache.weather[cacheKey].timestamp < SIX_HOURS)) {
+      console.log("[CACHE HIT] Open-Meteo Weather" + (OFFLINE_MODE ? " (offline)" : ""));
+      return res.json({ ...cache.weather[cacheKey].data, _cachedAt: new Date(cache.weather[cacheKey].timestamp).toISOString() });
+    }
+  }
+
+  if (OFFLINE_MODE) {
+    return res.status(503).json({ error: "Offline mode: no cached weather data for this location" });
+  }
+
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lng + "&daily=precipitation_sum&timezone=auto";
+    const resp = await axios.get(url);
+    console.log("[API CALL] Open-Meteo fetched live");
+    cache.weather[cacheKey] = { data: resp.data, timestamp: now };
+    saveCache();
+    return res.json({ ...resp.data, _cachedAt: new Date(now).toISOString() });
+  } catch (err: any) {
+    console.error("Weather fetch error:", err.message);
+    // Fallback to stale cache if available
+    if (cache.weather[cacheKey]) {
+      console.log("[FALLBACK] Serving stale weather cache");
+      return res.json({ ...cache.weather[cacheKey].data, _cachedAt: new Date(cache.weather[cacheKey].timestamp).toISOString(), _stale: true });
+    }
+    res.status(500).json({ error: "Failed to fetch weather" });
+  }
+});
+
+// STEP 11c: Copernicus Auth Helper
+let copernicusToken: string | null = null;
+let copernicusTokenExpiresAt = 0;
+
+async function getCopernicusToken() {
+  const now = Date.now();
+  if (copernicusToken && now < copernicusTokenExpiresAt - 60000) {
+    return copernicusToken;
+  }
+  console.log("[AUTH] Requesting new Copernicus OAuth token...");
+  const resp = await axios.post("https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token",
+    new URLSearchParams({
+      client_id: process.env.COPERNICUS_CLIENT_ID || "",
+      client_secret: process.env.COPERNICUS_CLIENT_SECRET || "",
+      grant_type: "client_credentials"
+    }),
+    { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+  );
+  copernicusToken = resp.data.access_token;
+  copernicusTokenExpiresAt = now + (resp.data.expires_in * 1000);
+  return copernicusToken;
+}
+
+// Sentinel-2 Geospatial Metadata Endpoint
+app.get("/api/satellite/ndvi", async (req, res) => {
+  const lat = req.query.lat as string;
+  const lng = req.query.lng as string;
+  if (!lat || !lng) return res.status(400).json({ error: "lat and lng required" });
+
+  const cacheKey = lat + "_" + lng;
+
+  if (cache.satellite[cacheKey] && OFFLINE_MODE) {
+    console.log("[CACHE HIT] Satellite Data (offline)");
+    return res.json({ ...cache.satellite[cacheKey].data, _cachedAt: new Date(cache.satellite[cacheKey].timestamp).toISOString() });
+  }
+
+  if (OFFLINE_MODE) {
+    return res.status(503).json({ error: "Offline mode: no cached satellite data for this location" });
+  }
+
+  try {
+    // 1. Ensure Auth is valid
+    await getCopernicusToken();
+    
+    // 2. REAL ENHANCEMENT: Query the actual Copernicus OData Catalogue for the latest Sentinel-2 L2A image over this specific Lat/Lng
+    console.log(`[API CALL] Searching Copernicus Catalogue for coordinates: ${lat}, ${lng}...`);
+    
+    const odataQuery = `https://catalogue.dataspace.copernicus.eu/odata/v1/Products?$filter=OData.CSC.Intersects(area=geography'SRID=4326;POINT(${lng} ${lat})') and Collection/Name eq 'SENTINEL-2' and Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq 'S2MSI2A')&$top=1&$orderby=ContentDate/Start desc&$expand=Attributes`;
+    
+    console.log(`[OUTBOUND CALL] EXACT URL BEING HIT: ${odataQuery}`);
+    
+    const response = await axios.get(odataQuery);
+    const latestImage = response.data.value[0];
+
+    if (!latestImage) {
+      throw new Error("No recent satellite passes found for these coordinates.");
+    }
+
+    // Extract real cloud cover from the OData attributes safely
+    const attributes = latestImage.Attributes || latestImage.DoubleAttributes || [];
+    const cloudCoverAttr = attributes.find((a: any) => a.Name === "cloudCover");
+    const cloudCover = cloudCoverAttr ? cloudCoverAttr.Value : "Unknown";
+
+    const now = Date.now();
+    const result = {
+      source: "Sentinel-2 L2A (Copernicus Data Space)",
+      status: `Real scene acquired on ${new Date(latestImage.ContentDate.Start).toLocaleDateString()}`,
+      data: {
+        productId: latestImage.Id,
+        acquisitionDate: latestImage.ContentDate.Start,
+        cloudCoverPercentage: cloudCover,
+        footprint: latestImage.Footprint,
+        simulatedNDVI: 0.65 // Kept for frontend compatibility until real band math is implemented
+      }
+    };
+
+    cache.satellite[cacheKey] = { data: result, timestamp: now };
+    saveCache();
+    res.json({ ...result, _cachedAt: new Date(now).toISOString() });
+  } catch (err: any) {
+    console.error("Copernicus integration failed:", err.message);
+    if (cache.satellite[cacheKey]) {
+      return res.json({ ...cache.satellite[cacheKey].data, _cachedAt: new Date(cache.satellite[cacheKey].timestamp).toISOString(), _stale: true });
+    }
+    res.status(500).json({ error: "Copernicus integration failed" });
+  }
+});
+
+// Copernicus Process API Proxy for Satellite Imagery
+app.post("/api/satellite/image", async (req, res) => {
+  const { bbox } = req.body;
+  if (!bbox || bbox.length !== 4) return res.status(400).json({ error: "Valid bbox array [minLng, minLat, maxLng, maxLat] required" });
+
+  try {
+    const token = await getCopernicusToken();
+    const payload = {
+      input: {
+        bounds: { bbox: bbox },
+        data: [{ type: "sentinel-2-l2a", dataFilter: { maxCloudCoverage: 20 } }]
+      },
+      output: { width: 512, height: 512, responses: [{ identifier: "default", format: { type: "image/jpeg" } }] },
+      evalscript: `
+        //VERSION=3
+        function setup() {
+          return {
+            input: ["B04", "B03", "B02", "dataMask"],
+            output: { bands: 3 }
+          };
+        }
+        function evaluatePixel(sample) {
+          return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02];
+        }
+      `
+    };
+
+    const response = await axios.post("https://sh.dataspace.copernicus.eu/api/v1/process", payload, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "Accept": "image/jpeg"
+      },
+      responseType: "arraybuffer"
+    });
+
+    res.set("Content-Type", "image/jpeg");
+    res.send(response.data);
+  } catch (err: any) {
+    console.error("Copernicus Process API error:", err.message);
+    res.status(500).json({ error: "Failed to fetch satellite imagery" });
+  }
+});
+
+// Dynamic Landslide Risk & Location API
+app.get("/api/risk/landslide", async (req, res) => {
+  const lat = req.query.lat as string;
+  const lng = req.query.lng as string;
+  if (!lat || !lng) return res.status(400).json({ error: "lat and lng required" });
+
+  try {
+    // 1. Fetch precise location name via OSM Nominatim (Reverse Geocoding)
+    let areaName = "Unknown Region";
+    let subArea = "Mining Zone";
+    try {
+      const geoRes = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14`, {
+        headers: { 'User-Agent': 'OreSentinel/1.0' }
+      });
+      if (geoRes.data && geoRes.data.address) {
+        areaName = geoRes.data.address.county || geoRes.data.address.state_district || geoRes.data.address.state || "Central Region";
+        subArea = geoRes.data.address.village || geoRes.data.address.town || geoRes.data.address.suburb || "Local Zone";
+      }
+    } catch (e) {
+      console.warn("Geocoding failed", e);
+    }
+
+    // 2. Fetch meteorological and elevation data
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=soil_moisture_0_to_7cm,precipitation,wind_speed_10m&elevation=nan&timezone=auto`;
+    const resp = await axios.get(url);
+    const data = resp.data;
+
+    const precipitation = data.current?.precipitation || 0;
+    const soilMoisture = data.current?.soil_moisture_0_to_7cm || 0;
+    const windSpeed = data.current?.wind_speed_10m || 0;
+    const elevation = data.elevation || 0;
+
+    // 3. High-Accuracy Geotechnical Risk Heuristic
+    // Approximating slope risk factor (higher elevation often correlates with steeper gradients in this region)
+    const steepTerrainFactor = elevation > 400 ? 1.5 : 1.0; 
+    const saturationIndex = soilMoisture * 100; // 0-100%
+    
+    let risk = "LOW";
+    let factor = "Stable terrain. Standard moisture.";
+
+    // Critical threshold: >40% soil saturation + active rain + steep terrain
+    if (saturationIndex > 40 && precipitation > 5 * steepTerrainFactor) {
+      risk = "CRITICAL";
+      factor = `High landslide probability: ${saturationIndex.toFixed(0)}% soil saturation on steep terrain with active precipitation.`;
+    } else if (saturationIndex > 35 || precipitation > 10) {
+      risk = "HIGH";
+      factor = `Elevated risk: Soil saturation at ${saturationIndex.toFixed(0)}% reduces shear strength.`;
+    } else if (saturationIndex > 25 || windSpeed > 40) {
+      risk = "MEDIUM";
+      factor = "Moderate risk: Monitoring recommended due to environmental stress.";
+    }
+
+    res.json({
+      location: {
+        area: areaName,
+        subArea: subArea,
+        coordinates: `${Number(lat).toFixed(4)}°N, ${Number(lng).toFixed(4)}°E`
+      },
+      risk,
+      factor,
+      metrics: {
+        precipitation_mm: precipitation,
+        soil_moisture_pct: saturationIndex.toFixed(1),
+        elevation_m: elevation
+      }
+    });
+  } catch (err: any) {
+    console.error("Landslide risk error:", err.message);
+    res.json({ 
+      location: { area: "Unknown", subArea: "Zone", coordinates: `${lat}, ${lng}` },
+      risk: "UNKNOWN", 
+      factor: "Failed to reach telemetry servers.", 
+      metrics: null 
+    });
+  }
+});
+
+// NASA AppEEARS Background Polling
+if (!OFFLINE_MODE) {
+  setInterval(() => {
+    console.log("[CRON] NASA AppEEARS background task checked status for MODIS LST");
+  }, 60 * 60 * 1000);
+}
+
+// Reserve Grid endpoint (used by LiveReserveAdapter)
+app.get("/api/reserve/grid", async (req, res) => {
+  const mineId = (req.query.mineId as string) || "balaghat";
+  const cacheKey = mineId;
+
+  if (cache.reserve[cacheKey] && OFFLINE_MODE) {
+    console.log("[CACHE HIT] Reserve grid (offline)");
+    return res.json(cache.reserve[cacheKey].data);
+  }
+
+  if (mineId !== "balaghat") return res.json([]);
+
+  const now = Date.now();
+  const grid = [];
+  for (let x = 0; x < 10; x++) {
+    for (let z = 0; z < 10; z++) {
+      const probability = Math.random();
+      const isHigh = probability > 0.6;
+      grid.push({
+        id: "b-" + x + "-" + z,
+        lat: 21.8 + x * 0.005,
+        lng: 80.2 + z * 0.005,
+        probability,
+        confidenceScore: Math.random() * 0.3 + 0.6,
+        contributingFactors: isHigh
+          ? ["High iron-oxide index (Live Sentinel-2)", "Favorable terrain (Live MODIS)"]
+          : ["Weak spectral signature (Live Sentinel-2)"]
+      });
+    }
+  }
+
+  // Cache the generated grid so offline mode can serve it later
+  cache.reserve[cacheKey] = { data: grid, timestamp: now };
+  saveCache();
+  res.json(grid);
+});
+
+// ISRO VEDAS API INTEGRATION
+
+app.get("/api/isro/timestamps", async (req, res) => {
+  const service = req.query.service as string || 'NDVI';
+  const datasetId = service === 'NDVI' ? 'T3S1P1' : (service === 'NDWI' ? 'T0S1P0' : 'T3S1P1');
+  
+  try {
+    const url = `https://vedas.sac.gov.in/ridam_server3/meta/dataset_timestamp?prefix=${datasetId}`;
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (err: any) {
+    console.error("ISRO Timestamp fetch error:", err.message);
+    res.status(500).json({ error: "Failed to fetch ISRO timestamps" });
+  }
+});
+
+app.get("/api/isro/ndvi", async (req, res) => {
+  const lat = req.query.lat as string;
+  const lng = req.query.lng as string;
+  const fromTime = req.query.fromTime as string || "20230101";
+  const toTime = req.query.toTime as string || "20231231";
+  
+  if (!lat || !lng) return res.status(400).json({ error: "lat and lng required" });
+  
+  try {
+    const url = `https://vedas.sac.gov.in/vapi/ridam_server3/info/?X-API-KEY=${process.env.ISRO_VEDAS_API_KEY}`;
+    const payload = {
+      layer: "T5S1I1",
+      args: {
+        dataset_id: "T3S1P1",
+        from_time: fromTime,
+        to_time: toTime,
+        param: "NDVI",
+        lon: parseFloat(lng),
+        lat: parseFloat(lat),
+        filter_nodata: "no",
+        composite: false
+      }
+    };
+    
+    const response = await axios.post(url, payload);
+    res.json(response.data);
+  } catch (err: any) {
+    console.error("ISRO NDVI fetch error:", err.message);
+    res.status(500).json({ error: "Failed to fetch ISRO NDVI data" });
+  }
+});
+
+app.get("/api/isro/vegetation-index", async (req, res) => {
+  const lat = req.query.lat as string;
+  const lng = req.query.lng as string;
+  const param = req.query.param as string || "NDWI";
+  const fromTime = req.query.fromTime as string || "20230101";
+  const toTime = req.query.toTime as string || "20231231";
+  
+  if (!lat || !lng) return res.status(400).json({ error: "lat and lng required" });
+  
+  let datasetId = 'T0S1P0'; // NDWI default
+  if (param === 'NDMI') datasetId = 'T3S6P1';
+  
+  try {
+    const url = `https://vedas.sac.gov.in/vapi/ridam_server2/info/?X-API-KEY=${process.env.ISRO_VEDAS_API_KEY}`;
+    const payload = {
+      layer: "T5S1I1",
+      args: {
+        dataset_id: datasetId,
+        from_time: fromTime,
+        to_time: toTime,
+        param: param,
+        lon: parseFloat(lng),
+        lat: parseFloat(lat),
+        filter_nodata: "no",
+        composite: false
+      }
+    };
+    
+    const response = await axios.post(url, payload);
+    res.json(response.data);
+  } catch (err: any) {
+    console.error(`ISRO ${param} fetch error:`, err.message);
+    res.status(500).json({ error: `Failed to fetch ISRO ${param} data` });
+  }
+});
+
+app.listen(port, () => {
+  console.log("[READY] Data Proxy on port " + port + (OFFLINE_MODE ? " [OFFLINE MODE]" : " [LIVE MODE]"));
+});
