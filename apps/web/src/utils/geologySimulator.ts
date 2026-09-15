@@ -46,6 +46,7 @@ export function generateStrikeAlignedAssays(center: [number, number], strike: nu
         realLat,
         realLng,
         mnGrade,
+        depthMeters: 50 + Math.random() * 200, // Depth from 50m to 250m
         probability: gradeProb,
         confidenceScore: Math.random() * 0.3 + 0.6,
       }

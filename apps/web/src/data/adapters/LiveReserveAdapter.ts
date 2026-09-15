@@ -1,5 +1,5 @@
 import type { ReserveDataAdapter } from "./ReserveDataAdapter";
-import { FeatureCollection } from "geojson";
+import type { FeatureCollection } from "geojson";
 import type { ReserveCell } from "../types/models";
 import { MockReserveAdapter } from "./MockReserveAdapter";
 

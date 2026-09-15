@@ -1,4 +1,4 @@
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import type { ReserveDataAdapter } from './ReserveDataAdapter';
 import type { ReserveCell } from '../types/models';
 import { generateStrikeAlignedAssays } from '../../utils/geologySimulator';

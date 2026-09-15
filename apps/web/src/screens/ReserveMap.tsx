@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 // @ts-ignore
 import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import DeckGL from '@deck.gl/react';
+import { PointCloudLayer } from '@deck.gl/layers';
 import { useAdapters } from '../data/adapters/AdapterContext';
 import type { ReserveCell } from '../data/types/models';
 import { motion } from 'framer-motion';
@@ -194,6 +196,7 @@ export const ReserveMap: React.FC = () => {
       const realLng = feature.geometry.coordinates[0];
       // Keep mnGrade from geologySimulator directly
       const mnGrade = feature.properties.mnGrade;
+      const depthMeters = feature.properties.depthMeters || 100;
       
       let tier: 'high' | 'medium' | 'low';
       if (mnGrade >= 44) tier = 'high';
@@ -209,6 +212,7 @@ export const ReserveMap: React.FC = () => {
         realLat, 
         realLng, 
         mnGrade, 
+        depthMeters,
         tier 
       };
     });
@@ -347,6 +351,23 @@ export const ReserveMap: React.FC = () => {
     );
   }
 
+  // Z-LEVEL 1: 3D SUBSURFACE VOXELS (Deck.GL PointCloud)
+  const deckLayers = [
+    new PointCloudLayer({
+      id: 'subsurface-assays',
+      data: processedGrid,
+      getPosition: (d: any) => [d.realLng, d.realLat, -d.depthMeters],
+      getColor: (d: any) => 
+        d.mnGrade >= 44 ? [16, 185, 129] : 
+        d.mnGrade >= 30 ? [245, 158, 11] : 
+        [236, 72, 153],
+      getNormal: [0, 0, 1],
+      pointSize: 15,
+      sizeUnits: 'meters',
+      visible: true
+    })
+  ];
+
   return (
     <motion.div 
       variants={motionPresets.fadeIn}
@@ -355,70 +376,70 @@ export const ReserveMap: React.FC = () => {
       exit="exit"
       className="relative w-full h-full bg-navy-950 overflow-hidden select-none"
     >
-      {/* ══════════════════════════════════════════════════════════════════
-          MAPLIBRE GL JS — Z-ORDER STACK (bottom to top):
-          1. Basemap (Esri Satellite)       — defined in mapStyle
-          2. Raster Overlays                — sentinel-iron-fill/lines
-          3. GeoJSON Polygons/Lines         — vedas-fault-fill/line
-          4. GeoJSON Heatmaps               — mineral-heatmap-layer
-          5. Symbols/Markers                — Drill site marker, labels
-          ═══════════════════════════════════════════════════════════════ */}
-      <Map
-        ref={mapRef}
+      <DeckGL
         initialViewState={{
           longitude: currentSite.lng,
           latitude: currentSite.lat,
           zoom: currentSite.zoom,
-          pitch: 35
+          pitch: 65,
+          bearing: 35,
+          maxPitch: 85
         }}
+        controller={true}
+        layers={deckLayers}
         style={{ width: '100%', height: '100%' }}
-        mapStyle={ESRI_SATELLITE_STYLE}
-        attributionControl={false}
       >
-        {/* ── Z-LEVEL 2: SENTINEL-2 IRON OXIDE RASTER OVERLAY ────────── */}
-        {compositeGeoJSON && (
-          <Source id="sentinel-composite-src" type="geojson" data={compositeGeoJSON}>
-            <Layer {...compositeFillLayer} />
-            <Layer {...compositeLineLayer} />
-          </Source>
-        )}
+        <Map
+          ref={mapRef}
+          mapStyle={ESRI_SATELLITE_STYLE}
+          reuseMaps
+          attributionControl={false}
+        >
+          {/* ── Z-LEVEL 2: SENTINEL-2 IRON OXIDE RASTER OVERLAY ────────── */}
+          {compositeGeoJSON && (
+            <Source id="sentinel-composite-src" type="geojson" data={compositeGeoJSON}>
+              <Layer {...compositeFillLayer} />
+              <Layer {...compositeLineLayer} />
+            </Source>
+          )}
 
-        {/* ── Z-LEVEL 3: ISRO VEDAS STRUCTURAL FAULTS (CORRIDOR) ─────── */}
-        {corridorFeature && (
-          <Source id="vedas-corridor-src" type="geojson" data={corridorFeature}>
-            <Layer {...corridorFillLayer} />
-            <Layer {...corridorLineLayer} />
-          </Source>
-        )}
+          {/* ── Z-LEVEL 3: ISRO VEDAS STRUCTURAL FAULTS (CORRIDOR) ─────── */}
+          {corridorFeature && (
+            <Source id="vedas-corridor-src" type="geojson" data={corridorFeature}>
+              <Layer {...corridorFillLayer} />
+              <Layer {...corridorLineLayer} />
+            </Source>
+          )}
 
-        {/* ── Z-LEVEL 3b: Corridor Label Tag (HTML Marker) ───────────── */}
-        {activeLayers.vedasFaults && corridorFeature && (
-          <Marker
-            latitude={currentSite.lat + 0.007}
-            longitude={currentSite.lng}
-            anchor="center"
-          >
-            <div className="px-2.5 py-1 bg-navy-900/90 border border-teal-500/60 rounded-md text-[10px] font-mono text-teal-300 font-bold shadow-lg backdrop-blur-md pointer-events-none flex items-center gap-1.5">
-              <span className="w-2 h-0 border-t-2 border-dashed border-teal-400 inline-block" />
-              <span>{currentSite.corridorName} ({currentSite.corridorAvgGrade})</span>
-            </div>
-          </Marker>
-        )}
+          {/* ── Z-LEVEL 3b: Corridor Label Tag (HTML Marker) ───────────── */}
+          {activeLayers.vedasFaults && corridorFeature && (
+            <Marker
+              latitude={currentSite.lat + 0.007}
+              longitude={currentSite.lng}
+              anchor="center"
+            >
+              <div className="px-2.5 py-1 bg-navy-900/90 border border-teal-500/60 rounded-md text-[10px] font-mono text-teal-300 font-bold shadow-lg backdrop-blur-md pointer-events-none flex items-center gap-1.5">
+                <span className="w-2 h-0 border-t-2 border-dashed border-teal-400 inline-block" />
+                <span>{currentSite.corridorName} ({currentSite.corridorAvgGrade})</span>
+              </div>
+            </Marker>
+          )}
 
-        {/* ── Z-LEVEL 3c: ASSAY MARKERS WITH MOIL GRADE ICONS ──────── */}
-        <AssayMarkersLayer 
-          gridData={processedGrid}
-          visible={activeLayers.sentinelIron}
-        />
+          {/* ── Z-LEVEL 3c: ASSAY MARKERS WITH MOIL GRADE ICONS ──────── */}
+          <AssayMarkersLayer 
+            gridData={processedGrid}
+            visible={activeLayers.sentinelIron}
+          />
 
-        {/* ── Z-LEVEL 4+5: HEATMAP & DRILL TARGET AI (self-contained) ── */}
-        <MineralHeatmapLayer 
-          featureCollection={rawFeatureCollection} 
-          recommendation={recommendation} 
-          opacity={activeLayers.nasaMn ? 0.75 : 0}
-          visible={activeLayers.nasaMn}
-        />
-      </Map>
+          {/* ── Z-LEVEL 4+5: HEATMAP & DRILL TARGET AI (self-contained) ── */}
+          <MineralHeatmapLayer 
+            featureCollection={rawFeatureCollection} 
+            recommendation={recommendation} 
+            opacity={activeLayers.nasaMn ? 0.75 : 0}
+            visible={activeLayers.nasaMn}
+          />
+        </Map>
+      </DeckGL>
 
       {/* ════════════════════════════════════════════════════════════════
           FLOATING UI PANELS — matches Balaghat reference layout
