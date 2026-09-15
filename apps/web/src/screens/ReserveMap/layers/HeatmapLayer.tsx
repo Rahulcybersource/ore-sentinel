@@ -6,9 +6,10 @@ interface HeatmapLayerProps {
   centerLat: number;
   centerLng: number;
   strikeTrend: number;
+  opacity?: number;
 }
 
-export const HeatmapLayer: React.FC<HeatmapLayerProps> = ({ centerLat, centerLng, strikeTrend }) => {
+export const HeatmapLayer: React.FC<HeatmapLayerProps> = ({ centerLat, centerLng, strikeTrend, opacity = 0.75 }) => {
   const geojsonData = useMemo(() => {
     // Generate points along the strike trend spanning 4.5km
     const points: any[] = [];
@@ -96,7 +97,8 @@ export const HeatmapLayer: React.FC<HeatmapLayerProps> = ({ centerLat, centerLng
             11, 15,
             16, 60
           ],
-          'heatmap-opacity': 0.75
+          'heatmap-opacity': opacity,
+          'heatmap-opacity-transition': { duration: 300 }
         }}
       />
     </Source>

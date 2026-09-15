@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import type { ReserveDataAdapter } from './ReserveDataAdapter';
 import type { ProductionDataAdapter } from './ProductionDataAdapter';
 import type { AlertsAdapter } from './AlertsAdapter';
@@ -9,16 +9,30 @@ import { MockAlertsAdapter } from './MockAlertsAdapter';
 import { MockRecommendationsAdapter } from './MockRecommendationsAdapter';
 import { LiveReserveAdapter } from './LiveReserveAdapter';
 
+export interface MapLayerState {
+  isroFaults: boolean;
+  sentinelIronOxide: boolean;
+  nasaHyperspectral: boolean;
+}
+
 export interface Adapters {
   reserve: ReserveDataAdapter;
   production: ProductionDataAdapter;
   alerts: AlertsAdapter;
   recommendations: RecommendationsAdapter;
+  mapLayers: MapLayerState;
+  toggleMapLayer: (layer: keyof MapLayerState) => void;
 }
 
 const AdapterContext = createContext<Adapters | null>(null);
 
 export const AdapterProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [mapLayers, setMapLayers] = useState<MapLayerState>({
+    isroFaults: true,
+    sentinelIronOxide: true,
+    nasaHyperspectral: true,
+  });
+
   const adapters = useMemo(() => {
     const useLive = import.meta.env.VITE_USE_LIVE_DATA === 'true';
     console.log(`[AdapterContext] Initializing adapters. VITE_USE_LIVE_DATA: ${useLive}`);
@@ -31,7 +45,17 @@ export const AdapterProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, []);
 
-  return <AdapterContext.Provider value={adapters}>{children}</AdapterContext.Provider>;
+  const toggleMapLayer = (layer: keyof MapLayerState) => {
+    setMapLayers(prev => ({ ...prev, [layer]: !prev[layer] }));
+  };
+
+  const value = useMemo(() => ({
+    ...adapters,
+    mapLayers,
+    toggleMapLayer
+  }), [adapters, mapLayers]);
+
+  return <AdapterContext.Provider value={value}>{children}</AdapterContext.Provider>;
 };
 
 export const useAdapters = () => {

@@ -6,14 +6,11 @@ import { useAdapters } from '../data/adapters/AdapterContext';
 import type { ReserveCell } from '../data/types/models';
 import { motion } from 'framer-motion';
 import { 
-  Layers, 
   Info, 
   Target, 
   Triangle, 
   Circle, 
   Diamond, 
-  X, 
-  Sparkles,
   Compass,
   ChevronDown
 } from 'lucide-react';
@@ -21,7 +18,8 @@ import { motionPresets } from '../theme/tokens';
 import { ErrorState, SkeletonBar } from '../components/Skeletons';
 
 import { NATIONAL_MN_REGISTRY } from '../data/constants/mineRegistry';
-import { HeatmapLayer } from './ReserveMap/layers/HeatmapLayer';
+import { MineralHeatmapLayer } from './ReserveMap/layers/MineralHeatmapLayer';
+import { LayerController } from './ReserveMap/LayerController';
 import { evaluateDrillTarget } from '../utils/drillTargetEvaluator';
 
 // Helper to grab coords from the registry
@@ -49,7 +47,7 @@ const MINE_SITES: Record<string, MineSiteConfig> = {
     lat: getSite('BAL-01')?.coordinates[1] || 0,
     lng: getSite('BAL-01')?.coordinates[0] || 0,
     strikeTrend: getSite('BAL-01')?.strikeTrend || 75,
-    zoom: 14.5, // slightly zoomed out to see 4.5km
+    zoom: 14.5,
     corridorName: 'North Manganese Corridor',
     corridorAvgGrade: 'avg. 48.6% Mn',
     roadDistance: '340m'
@@ -81,6 +79,7 @@ const MINE_SITES: Record<string, MineSiteConfig> = {
 };
 
 // Esri World Imagery Raster Tile Source — Standard high-resolution satellite basemap
+// The basemap occupies Z-level 1 (bottom of the visual stack)
 const ESRI_SATELLITE_STYLE: any = {
   version: 8,
   sources: {
@@ -138,20 +137,22 @@ export const ReserveMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Layer toggles
-  const [showComposite, setShowComposite] = useState(true);
-  const [showMarkers, setShowMarkers] = useState(true);
-  const [showRecommendation, setShowRecommendation] = useState(true);
-
-  // Recommendation callout state
-  const [showPopup, setShowPopup] = useState(false);
+  // ─── LAYER TOGGLE STATE ───────────────────────────────────────────────
+  // These booleans drive both `layout.visibility` AND `paint.*-opacity`
+  // on every MapLibre <Layer> component. The source of truth is
+  // AdapterContext.mapLayers, toggled by LayerController.
+  const { mapLayers } = adapters;
+  const activeLayers = {
+    vedasFaults:  mapLayers.isroFaults,
+    sentinelIron: mapLayers.sentinelIronOxide,
+    nasaMn:       mapLayers.nasaHyperspectral,
+  };
 
   // Fetch reserve data for selected site
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // The adapter consumes the site ID (or falls back to balaghat if live proxy is running)
       const data = await adapters.reserve.getReserveGrid(selectedSiteId);
       setRawGrid(data);
     } catch (err) {
@@ -169,7 +170,6 @@ export const ReserveMap: React.FC = () => {
   // When switching sites, smoothly fly the map camera to the new coordinates
   const handleSiteChange = (siteId: string) => {
     setSelectedSiteId(siteId);
-    setShowPopup(false);
     const target = MINE_SITES[siteId];
     if (target && mapRef.current) {
       mapRef.current.flyTo({
@@ -184,48 +184,30 @@ export const ReserveMap: React.FC = () => {
   // Anchor every cell around the real site coordinates (~1-2km radius)
   const { processedGrid, corridorFeature } = useMemo(() => {
     if (!rawGrid.length) {
-      return { 
-        processedGrid: [], 
-        corridorFeature: null 
-      };
+      return { processedGrid: [], corridorFeature: null };
     }
 
     const highMedPoints: { lat: number; lng: number }[] = [];
-
-    // Anchor spacing: ~0.0022 deg lat (~240m) and ~0.0024 deg lng (~250m)
-    // 10x10 grid spans roughly 2.2km x 2.4km, tightly surrounding the real mine site
     const processed = rawGrid.map((cell, index) => {
       const row = Math.floor(index / 10);
       const col = index % 10;
       
       const realLat = currentSite.lat + (row - 4.5) * 0.0022;
       const realLng = currentSite.lng + (col - 4.5) * 0.0024;
-
-      // Realistic MOIL Manganese grade mapping (22% to 54% Mn)
       const mnGrade = (cell.probability * 32) + 22;
       
-      // Strict MOIL Tier Standards
       let tier: 'high' | 'medium' | 'low';
-      if (mnGrade >= 44) tier = 'high';        // Ferro Grade (>= 44% Mn)
-      else if (mnGrade >= 30) tier = 'medium'; // SMGR Grade (30-43% Mn)
-      else tier = 'low';                       // Blast Furnace Grade (< 30% Mn)
+      if (mnGrade >= 44) tier = 'high';
+      else if (mnGrade >= 30) tier = 'medium';
+      else tier = 'low';
 
       if (tier === 'high' || tier === 'medium') {
         highMedPoints.push({ lat: realLat, lng: realLng });
       }
 
-      const item = {
-        ...cell,
-        realLat,
-        realLng,
-        mnGrade,
-        tier
-      };
-
-      return item;
+      return { ...cell, realLat, realLng, mnGrade, tier };
     });
 
-    // Compute the corridor boundary polygon over the real coordinates
     const hull = getConvexHull(highMedPoints);
     const corridor = hull.length > 3 ? {
       type: 'FeatureCollection' as const,
@@ -239,18 +221,15 @@ export const ReserveMap: React.FC = () => {
       }]
     } : null;
 
-    return { 
-      processedGrid: processed, 
-      corridorFeature: corridor 
-    };
+    return { processedGrid: processed, corridorFeature: corridor };
   }, [rawGrid, currentSite]);
 
   const recommendation = useMemo(() => {
     return evaluateDrillTarget(currentSite.lat, currentSite.lng, currentSite.strikeTrend);
   }, [currentSite]);
 
-  // Geological Alteration Raster Grid (Iron-Oxide / Clay / Ferrous Mineral Composite)
-  // Semi-transparent overlay directly on top of the satellite tiles
+  // ─── Z-LEVEL 2: Sentinel-2 Iron Oxide Raster Overlay ──────────────────
+  // GeoJSON polygon grid simulating spectral alteration composite
   const compositeGeoJSON = useMemo(() => {
     if (!processedGrid.length) return null;
     const halfLat = 0.0011;
@@ -276,56 +255,61 @@ export const ReserveMap: React.FC = () => {
     return { type: 'FeatureCollection' as const, features };
   }, [processedGrid]);
 
-  // MapLibre layer styling for the geological alteration overlay (blended with satellite)
+  // ─── LAYER DEFINITIONS (visibility + opacity dual-control) ────────────
+  // Using BOTH layout.visibility AND paint.*-opacity ensures:
+  //   • layout.visibility = 'none' → MapLibre skips rendering entirely (perf)
+  //   • paint.*-opacity with transition → smooth crossfade when toggling
+
+  // Z-LEVEL 2: Sentinel Iron Oxide composite fill
   const compositeFillLayer: any = {
-    id: 'composite-fill',
+    id: 'sentinel-iron-fill',
     type: 'fill',
     paint: {
       'fill-color': [
         'interpolate', ['linear'], ['get', 'probability'],
-        0.0, 'rgba(67, 56, 202, 0.15)',   // Low alteration: faint indigo
-        0.4, 'rgba(16, 185, 129, 0.35)',  // Moderate alteration: translucent green
-        0.7, 'rgba(245, 158, 11, 0.50)',  // Iron-oxide gossan signature: vibrant amber
-        1.0, 'rgba(239, 68, 68, 0.65)'    // High-grade manganese anomaly: rich crimson
+        0.0, 'rgba(67, 56, 202, 0.15)',
+        0.4, 'rgba(16, 185, 129, 0.35)',
+        0.7, 'rgba(245, 158, 11, 0.50)',
+        1.0, 'rgba(239, 68, 68, 0.65)'
       ],
-      'fill-opacity': showComposite ? 1 : 0
+      'fill-opacity': activeLayers.sentinelIron ? 0.85 : 0,
+      'fill-opacity-transition': { duration: 300 }
     }
   };
 
+  // Z-LEVEL 2: Sentinel grid lines
   const compositeLineLayer: any = {
-    id: 'composite-lines',
+    id: 'sentinel-iron-lines',
     type: 'line',
     paint: {
       'line-color': 'rgba(255, 255, 255, 0.12)',
-      'line-width': 1
-    },
-    layout: {
-      visibility: showComposite ? 'visible' : 'none'
+      'line-width': 1,
+      'line-opacity': activeLayers.sentinelIron ? 1 : 0,
+      'line-opacity-transition': { duration: 300 }
     }
   };
 
+  // Z-LEVEL 3: ISRO Structural Faults — corridor boundary fill
+  const corridorFillLayer: any = {
+    id: 'vedas-fault-fill',
+    type: 'fill',
+    paint: {
+      'fill-color': '#00D9C0',
+      'fill-opacity': activeLayers.vedasFaults ? 0.12 : 0,
+      'fill-opacity-transition': { duration: 300 }
+    }
+  };
+
+  // Z-LEVEL 3: ISRO Structural Faults — corridor dashed boundary line
   const corridorLineLayer: any = {
-    id: 'corridor-line',
+    id: 'vedas-fault-line',
     type: 'line',
     paint: {
       'line-color': '#00D9C0',
       'line-width': 2.5,
-      'line-dasharray': [4, 3]
-    },
-    layout: {
-      visibility: showMarkers ? 'visible' : 'none'
-    }
-  };
-
-  const corridorFillLayer: any = {
-    id: 'corridor-fill',
-    type: 'fill',
-    paint: {
-      'fill-color': '#00D9C0',
-      'fill-opacity': 0.12
-    },
-    layout: {
-      visibility: showMarkers ? 'visible' : 'none'
+      'line-dasharray': [4, 3],
+      'line-opacity': activeLayers.vedasFaults ? 1 : 0,
+      'line-opacity-transition': { duration: 300 }
     }
   };
 
@@ -354,7 +338,14 @@ export const ReserveMap: React.FC = () => {
       exit="exit"
       className="relative w-full h-full bg-navy-950 overflow-hidden select-none"
     >
-      {/* MAPLIBRE GL JS CONTAINER WITH REAL SATELLITE TILES */}
+      {/* ══════════════════════════════════════════════════════════════════
+          MAPLIBRE GL JS — Z-ORDER STACK (bottom to top):
+          1. Basemap (Esri Satellite)       — defined in mapStyle
+          2. Raster Overlays                — sentinel-iron-fill/lines
+          3. GeoJSON Polygons/Lines         — vedas-fault-fill/line
+          4. GeoJSON Heatmaps               — mineral-heatmap-layer
+          5. Symbols/Markers                — Drill site marker, labels
+          ═══════════════════════════════════════════════════════════════ */}
       <Map
         ref={mapRef}
         initialViewState={{
@@ -367,24 +358,24 @@ export const ReserveMap: React.FC = () => {
         mapStyle={ESRI_SATELLITE_STYLE}
         attributionControl={false}
       >
-        {/* SEMI-TRANSPARENT MINERAL COMPOSITE (ALTERATION OVERLAY ON SATELLITE) */}
+        {/* ── Z-LEVEL 2: SENTINEL-2 IRON OXIDE RASTER OVERLAY ────────── */}
         {compositeGeoJSON && (
-          <Source type="geojson" data={compositeGeoJSON}>
+          <Source id="sentinel-composite-src" type="geojson" data={compositeGeoJSON}>
             <Layer {...compositeFillLayer} />
             <Layer {...compositeLineLayer} />
           </Source>
         )}
 
-        {/* CORRIDOR POLYGON ANCHORED OVER REAL MINE STRIKE */}
+        {/* ── Z-LEVEL 3: ISRO VEDAS STRUCTURAL FAULTS (CORRIDOR) ─────── */}
         {corridorFeature && (
-          <Source type="geojson" data={corridorFeature}>
+          <Source id="vedas-corridor-src" type="geojson" data={corridorFeature}>
             <Layer {...corridorFillLayer} />
             <Layer {...corridorLineLayer} />
           </Source>
         )}
 
-        {/* Corridor Label Tag */}
-        {showMarkers && corridorFeature && (
+        {/* ── Z-LEVEL 3b: Corridor Label Tag (HTML Marker) ───────────── */}
+        {activeLayers.vedasFaults && corridorFeature && (
           <Marker
             latitude={currentSite.lat + 0.007}
             longitude={currentSite.lng}
@@ -397,131 +388,21 @@ export const ReserveMap: React.FC = () => {
           </Marker>
         )}
 
-          {/* KERNEL DENSITY ESTIMATION HEATMAP (SENTINEL-2 ALTERATION SIMULATION) */}
-          {showMarkers && (
-            <HeatmapLayer 
-              centerLat={currentSite.lat} 
-              centerLng={currentSite.lng} 
-              strikeTrend={currentSite.strikeTrend} 
-            />
-          )}
-
-          {/* RECOMMENDED NEXT DRILL SITE (PULSING STAR / TARGET ANCHORED TO REAL LAT/LNG) */}
-          {showRecommendation && recommendation && (
-            <Marker 
-              latitude={recommendation.lat} 
-              longitude={recommendation.lng} 
-              anchor="bottom"
-              onClick={(e: any) => { 
-                e.originalEvent.stopPropagation(); 
-                setShowPopup(true); 
-              }}
-            >
-              <div className="relative flex flex-col items-center group cursor-pointer">
-                {/* Radar pulse ripples directly over satellite pit */}
-                <div className="absolute -top-3 w-10 h-10 bg-accent-400/40 rounded-full animate-ping pointer-events-none" />
-                <div className="absolute -top-1 w-6 h-6 bg-accent-400/60 rounded-full animate-pulse pointer-events-none" />
-                
-                <div className="p-1.5 bg-accent-400 rounded-full text-app-bg shadow-[0_0_15px_rgba(0,240,255,0.8)] relative z-10 transition-transform group-hover:scale-110">
-                  <Target size={20} className="stroke-[2.5]" />
-                </div>
-  
-                <div className="mt-1 px-2.5 py-1 bg-app-bg/95 border border-accent-400/80 rounded-md text-[10px] font-bold text-accent-400 whitespace-nowrap shadow-2xl backdrop-blur-md uppercase tracking-wider relative z-10 font-mono">
-                  Recommended Next Drill Site
-                </div>
-              </div>
-            </Marker>
-          )}
-  
-          {/* INLINE CALLOUT POPUP ANCHORED TO THAT EXACT DRILL LOCATION */}
-          {showRecommendation && recommendation && showPopup && (
-            <Popup 
-              latitude={recommendation.lat} 
-              longitude={recommendation.lng}
-              anchor="top"
-              onClose={() => setShowPopup(false)}
-              closeButton={false}
-              offset={[0, 12]}
-            >
-              <div className="bg-app-bg/95 border border-accent-400/50 p-5 rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.15)] w-80 text-white backdrop-blur-md">
-                <div className="flex justify-between items-start mb-3 border-b border-accent-400/20 pb-2.5">
-                  <div>
-                    <span className="telemetry-label flex items-center gap-1.5">
-                      <Sparkles size={13} /> AI Exploration Target
-                    </span>
-                    <h4 className="font-bold text-white text-sm mt-0.5">
-                      Recommended Next Drill Site
-                    </h4>
-                  </div>
-                  <button 
-                    onClick={() => setShowPopup(false)} 
-                    className="text-muted-400 hover:text-white p-1 rounded-md hover:bg-card-bg transition-colors"
-                  >
-                    <X size={15} />
-                  </button>
-                </div>
-  
-                <div className="space-y-2.5 text-xs">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-card-bg p-2 rounded-lg border border-accent-400/20">
-                      <span className="text-muted-400 text-[10px] uppercase block mb-0.5">Latitude</span>
-                      <span className="font-mono font-bold text-white">{recommendation.lat.toFixed(6)}°</span>
-                    </div>
-                    <div className="bg-card-bg p-2 rounded-lg border border-accent-400/20">
-                      <span className="text-muted-400 text-[10px] uppercase block mb-0.5">Longitude</span>
-                      <span className="font-mono font-bold text-white">{recommendation.lng.toFixed(6)}°</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-card-bg p-2 rounded-lg border border-accent-400/20">
-                      <span className="text-muted-400 text-[10px] uppercase block mb-0.5">Target Horizon</span>
-                      <span className="font-mono font-bold text-white">{recommendation.targetDepth}</span>
-                    </div>
-                    <div className="bg-card-bg p-2 rounded-lg border border-accent-400/20">
-                      <span className="text-muted-400 text-[10px] uppercase block mb-0.5">Dip Angle</span>
-                      <span className="font-mono font-bold text-white">{recommendation.dipAngle}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center bg-card-bg p-2.5 rounded-lg border border-accent-400/20 mt-2">
-                    <span className="text-muted-400">Estimated Mn Grade:</span>
-                    <span className="font-mono font-bold text-green-400 text-sm">
-                      {(recommendation.mnGrade - 1.2).toFixed(1)}% &ndash; {(recommendation.mnGrade + 2.4).toFixed(1)}%
-                    </span>
-                  </div>
-  
-                  <div className="flex justify-between items-center bg-card-bg p-2.5 rounded-lg border border-accent-400/20">
-                    <span className="text-muted-400">Confidence Score:</span>
-                    <span className="font-mono font-bold text-accent-400 text-sm">
-                      {(recommendation.confidenceScore * 100).toFixed(0)}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Popup>
-          )}
+        {/* ── Z-LEVEL 4+5: HEATMAP & DRILL TARGET AI (self-contained) ── */}
+        <MineralHeatmapLayer 
+          gridData={processedGrid} 
+          recommendation={recommendation} 
+          opacity={activeLayers.nasaMn ? 0.75 : 0}
+          visible={activeLayers.nasaMn}
+        />
       </Map>
 
-        {/* FLOATING UI PANELS - SPACE TECH TELEMETRY HUD */}
-      <div className="absolute inset-0 pointer-events-none p-6 flex flex-col justify-between z-10">
+      {/* ════════════════════════════════════════════════════════════════
+          FLOATING UI PANELS (positioned absolute, z-10 above map)
+          ════════════════════════════════════════════════════════════ */}
+      <div className="absolute inset-0 pointer-events-none p-5 flex flex-col justify-between z-10">
         
-        {/* CENTER CROSSHAIRS */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center opacity-60">
-          <div className="w-48 h-px bg-accent-400/40 absolute"></div>
-          <div className="w-px h-48 bg-accent-400/40 absolute"></div>
-          <div className="w-10 h-10 border border-accent-400/80 rounded-full relative">
-            <div className="absolute -top-1 left-1/2 w-1 h-2 bg-accent-400 -translate-x-1/2"></div>
-            <div className="absolute -bottom-1 left-1/2 w-1 h-2 bg-accent-400 -translate-x-1/2"></div>
-            <div className="absolute top-1/2 -left-1 w-2 h-1 bg-accent-400 -translate-y-1/2"></div>
-            <div className="absolute top-1/2 -right-1 w-2 h-1 bg-accent-400 -translate-y-1/2"></div>
-          </div>
-          <span className="absolute -bottom-6 font-mono text-[10px] text-accent-400">
-            {currentSite.lat.toFixed(5)} N, {currentSite.lng.toFixed(5)} E
-          </span>
-        </div>
-
-        {/* TOP HUD: SITE & SENSOR CONTROLS */}
+        {/* TOP ROW: SITE SWITCHER & ADVANCED LAYER CONTROLS */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           {/* Site Selector HUD */}
           <div className="glass-panel p-4 pointer-events-auto w-72">
@@ -552,15 +433,15 @@ export const ReserveMap: React.FC = () => {
             <span className="telemetry-label border-b border-accent-400/20 pb-2">Sensor Array</span>
             <label className="flex items-center justify-between cursor-pointer group font-mono text-xs">
               <span className="text-pink-400 group-hover:text-pink-500 transition-colors">SAR (Manganese)</span>
-              <input type="checkbox" checked={showComposite} onChange={(e) => setShowComposite(e.target.checked)} className="accent-pink-500" />
+              <input type="checkbox" checked={activeLayers.sentinelIron} onChange={(e) => adapters.toggleMapLayer('sentinelIronOxide', e.target.checked)} className="accent-pink-500" />
             </label>
             <label className="flex items-center justify-between cursor-pointer group font-mono text-xs">
               <span className="text-green-400 group-hover:text-green-500 transition-colors">NDVI (Vegetation)</span>
-              <input type="checkbox" checked={showMarkers} onChange={(e) => setShowMarkers(e.target.checked)} className="accent-green-500" />
+              <input type="checkbox" checked={activeLayers.vedasFaults} onChange={(e) => adapters.toggleMapLayer('isroFaults', e.target.checked)} className="accent-green-500" />
             </label>
             <label className="flex items-center justify-between cursor-pointer group font-mono text-xs">
               <span className="text-accent-400 group-hover:text-accent-500 transition-colors">LiDAR (Elevation)</span>
-              <input type="checkbox" checked={showRecommendation} onChange={(e) => setShowRecommendation(e.target.checked)} className="accent-accent-400" />
+              <input type="checkbox" checked={activeLayers.nasaMn} onChange={(e) => adapters.toggleMapLayer('nasaHyperspectral', e.target.checked)} className="accent-accent-400" />
             </label>
           </div>
         </div>
