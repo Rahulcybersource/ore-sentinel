@@ -8,6 +8,7 @@ import { Alerts } from './screens/Alerts';
 import { Recommendations } from './screens/Recommendations';
 import { CorporateView } from './screens/CorporateView';
 import { NationalOverview } from './screens/NationalOverview';
+import { SatelliteView } from './screens/SatelliteView';
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="recommendations" element={<Recommendations />} />
         <Route path="corporate" element={<CorporateView />} />
         <Route path="national" element={<NationalOverview />} />
+        <Route path="satellite" element={<SatelliteView />} />
         <Route path="style-guide" element={<StyleGuide />} />
       </Route>
     </Routes>

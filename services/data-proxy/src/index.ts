@@ -239,6 +239,90 @@ app.get("/api/reserve/grid", async (req, res) => {
   res.json(grid);
 });
 
+// ISRO VEDAS API INTEGRATION
+
+app.get("/api/isro/timestamps", async (req, res) => {
+  const service = req.query.service as string || 'NDVI';
+  const datasetId = service === 'NDVI' ? 'T3S1P1' : (service === 'NDWI' ? 'T0S1P0' : 'T3S1P1');
+  
+  try {
+    const url = `https://vedas.sac.gov.in/ridam_server3/meta/dataset_timestamp?prefix=${datasetId}`;
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (err: any) {
+    console.error("ISRO Timestamp fetch error:", err.message);
+    res.status(500).json({ error: "Failed to fetch ISRO timestamps" });
+  }
+});
+
+app.get("/api/isro/ndvi", async (req, res) => {
+  const lat = req.query.lat as string;
+  const lng = req.query.lng as string;
+  const fromTime = req.query.fromTime as string || "20230101";
+  const toTime = req.query.toTime as string || "20231231";
+  
+  if (!lat || !lng) return res.status(400).json({ error: "lat and lng required" });
+  
+  try {
+    const url = `https://vedas.sac.gov.in/vapi/ridam_server3/info/?X-API-KEY=${process.env.ISRO_VEDAS_API_KEY}`;
+    const payload = {
+      layer: "T5S1I1",
+      args: {
+        dataset_id: "T3S1P1",
+        from_time: fromTime,
+        to_time: toTime,
+        param: "NDVI",
+        lon: parseFloat(lng),
+        lat: parseFloat(lat),
+        filter_nodata: "no",
+        composite: false
+      }
+    };
+    
+    const response = await axios.post(url, payload);
+    res.json(response.data);
+  } catch (err: any) {
+    console.error("ISRO NDVI fetch error:", err.message);
+    res.status(500).json({ error: "Failed to fetch ISRO NDVI data" });
+  }
+});
+
+app.get("/api/isro/vegetation-index", async (req, res) => {
+  const lat = req.query.lat as string;
+  const lng = req.query.lng as string;
+  const param = req.query.param as string || "NDWI";
+  const fromTime = req.query.fromTime as string || "20230101";
+  const toTime = req.query.toTime as string || "20231231";
+  
+  if (!lat || !lng) return res.status(400).json({ error: "lat and lng required" });
+  
+  let datasetId = 'T0S1P0'; // NDWI default
+  if (param === 'NDMI') datasetId = 'T3S6P1';
+  
+  try {
+    const url = `https://vedas.sac.gov.in/vapi/ridam_server2/info/?X-API-KEY=${process.env.ISRO_VEDAS_API_KEY}`;
+    const payload = {
+      layer: "T5S1I1",
+      args: {
+        dataset_id: datasetId,
+        from_time: fromTime,
+        to_time: toTime,
+        param: param,
+        lon: parseFloat(lng),
+        lat: parseFloat(lat),
+        filter_nodata: "no",
+        composite: false
+      }
+    };
+    
+    const response = await axios.post(url, payload);
+    res.json(response.data);
+  } catch (err: any) {
+    console.error(`ISRO ${param} fetch error:`, err.message);
+    res.status(500).json({ error: `Failed to fetch ISRO ${param} data` });
+  }
+});
+
 app.listen(port, () => {
   console.log("[READY] Data Proxy on port " + port + (OFFLINE_MODE ? " [OFFLINE MODE]" : " [LIVE MODE]"));
 });
