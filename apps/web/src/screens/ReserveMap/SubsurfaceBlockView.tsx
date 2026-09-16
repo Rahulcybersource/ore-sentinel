@@ -39,10 +39,10 @@ function generateOreVoxels() {
     let gradeType = 'bf';
     const depthTrue = z * 5; // Scale to real meters (e.g. -70 = -350m)
     
-    // Ensure the high-grade core is continuous between -100m and -180m
-    if (depthTrue <= -100 && depthTrue >= -180 && Math.abs(x) < 22) {
+    // Ensure the high-grade core is continuous between -100m and -250m
+    if (depthTrue <= -100 && depthTrue >= -250 && Math.abs(x) < 25) {
       gradeType = 'ferro';
-    } else if (depthTrue <= -70 && depthTrue >= -220 && Math.abs(x) < 38) {
+    } else if (depthTrue <= -70 && depthTrue >= -270 && Math.abs(x) < 40) {
       gradeType = 'smgr';
     }
     
@@ -109,7 +109,7 @@ const HostRockBlock = ({ depthLimit, explodedOffset }: { depthLimit: number, exp
   const yOffset = -depthZ / 2 + explodedOffset;
   
   const depthMarks = [-50, -100, -150, -200, -250, -300, -350];
-  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#1E293B', opacity: 0.85, transparent: true, side: THREE.DoubleSide });
+  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#1E293B', side: THREE.DoubleSide });
 
   return (
     <group position={[0, yOffset, 0]}>
@@ -172,7 +172,7 @@ const SurfacePlane = ({ onClick, explodedOffset }: { onClick: (pt: THREE.Vector3
 
   useEffect(() => {
     const loader = new THREE.TextureLoader();
-    loader.load('/balaghat_demo_map.png', (tex) => {
+    loader.load('/textures/balaghat-satellite.jpg', (tex) => {
       setTexture(tex);
     }, undefined, () => {
       console.warn('Satellite texture failed to load, using high-contrast terrain fallback.');
@@ -190,17 +190,6 @@ const SurfacePlane = ({ onClick, explodedOffset }: { onClick: (pt: THREE.Vector3
         )}
         {!texture && <Edges scale={1} threshold={15} color="#4ade80" />}
       </mesh>
-      
-      {/* Labels */}
-      <Html position={[-30, 2, -30]} center className="pointer-events-none">
-        <div className="bg-navy-950/80 border border-white/20 text-[8px] text-white px-2 py-1 rounded backdrop-blur whitespace-nowrap">
-          BHARVELI MINE SITE (SURFACE)
-          <div className="absolute top-full left-1/2 w-0.5 h-4 bg-white/50 -translate-x-1/2"></div>
-        </div>
-      </Html>
-      <Html position={[30, 2, -10]} center className="pointer-events-none">
-        <div className="text-[10px] text-white/70 font-bold whitespace-nowrap">VILLAGE</div>
-      </Html>
     </group>
   );
 };
