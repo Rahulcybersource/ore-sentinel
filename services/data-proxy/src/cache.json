@@ -60,19 +60,18 @@
           "id": "b-0-0",
           "lat": 21.8,
           "lng": 80.2,
-          "probability": 0.9481760622526578,
-          "confidenceScore": 0.6323793413158548,
+          "probability": 0.033859023600440574,
+          "confidenceScore": 0.6096743441654241,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-0-1",
           "lat": 21.8,
           "lng": 80.205,
-          "probability": 0.26213999558448553,
-          "confidenceScore": 0.7472058944152848,
+          "probability": 0.20886960140321298,
+          "confidenceScore": 0.6889944242474271,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -81,30 +80,28 @@
           "id": "b-0-2",
           "lat": 21.8,
           "lng": 80.21000000000001,
-          "probability": 0.7063725638778303,
-          "confidenceScore": 0.7798108332172407,
+          "probability": 0.5674700661562756,
+          "confidenceScore": 0.6901550741427898,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-0-3",
           "lat": 21.8,
           "lng": 80.215,
-          "probability": 0.9302518086051262,
-          "confidenceScore": 0.7816813203079052,
+          "probability": 0.09316882977621521,
+          "confidenceScore": 0.88587955209891,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-0-4",
           "lat": 21.8,
           "lng": 80.22,
-          "probability": 0.02578538083977855,
-          "confidenceScore": 0.8649464070137334,
+          "probability": 0.5736769991757598,
+          "confidenceScore": 0.8540695926938052,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -113,8 +110,8 @@
           "id": "b-0-5",
           "lat": 21.8,
           "lng": 80.22500000000001,
-          "probability": 0.46905465266211877,
-          "confidenceScore": 0.8862303053346068,
+          "probability": 0.5655453032042109,
+          "confidenceScore": 0.71480463137774,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -123,8 +120,8 @@
           "id": "b-0-6",
           "lat": 21.8,
           "lng": 80.23,
-          "probability": 0.4007471700808345,
-          "confidenceScore": 0.8924978763602224,
+          "probability": 0.10645126292545148,
+          "confidenceScore": 0.7148859177822193,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -133,8 +130,8 @@
           "id": "b-0-7",
           "lat": 21.8,
           "lng": 80.235,
-          "probability": 0.902227458526456,
-          "confidenceScore": 0.6673129015700223,
+          "probability": 0.6845584914377764,
+          "confidenceScore": 0.7214992524574501,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -144,19 +141,18 @@
           "id": "b-0-8",
           "lat": 21.8,
           "lng": 80.24000000000001,
-          "probability": 0.6720672191662342,
-          "confidenceScore": 0.8984341414413539,
+          "probability": 0.4079727610158239,
+          "confidenceScore": 0.8385521924546422,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-0-9",
           "lat": 21.8,
           "lng": 80.245,
-          "probability": 0.09533492231731899,
-          "confidenceScore": 0.7266825035442456,
+          "probability": 0.47174201679472716,
+          "confidenceScore": 0.8764400606081122,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -165,8 +161,8 @@
           "id": "b-1-0",
           "lat": 21.805,
           "lng": 80.2,
-          "probability": 0.565888034477854,
-          "confidenceScore": 0.7114919414610296,
+          "probability": 0.593443872776196,
+          "confidenceScore": 0.8147973702204063,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -175,30 +171,28 @@
           "id": "b-1-1",
           "lat": 21.805,
           "lng": 80.205,
-          "probability": 0.7614300311846839,
-          "confidenceScore": 0.6125926706156746,
+          "probability": 0.4069459776170521,
+          "confidenceScore": 0.7897666988715619,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-1-2",
           "lat": 21.805,
           "lng": 80.21000000000001,
-          "probability": 0.803211810905531,
-          "confidenceScore": 0.6414408049297691,
+          "probability": 0.030509687053674517,
+          "confidenceScore": 0.7659871519800279,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-1-3",
           "lat": 21.805,
           "lng": 80.215,
-          "probability": 0.7546363100046062,
-          "confidenceScore": 0.6522465994906576,
+          "probability": 0.957346737151739,
+          "confidenceScore": 0.6881645036224,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -208,18 +202,19 @@
           "id": "b-1-4",
           "lat": 21.805,
           "lng": 80.22,
-          "probability": 0.05806408981077604,
-          "confidenceScore": 0.7460950030320512,
+          "probability": 0.8942554419678228,
+          "confidenceScore": 0.663664326656954,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-1-5",
           "lat": 21.805,
           "lng": 80.22500000000001,
-          "probability": 0.13916055198847477,
-          "confidenceScore": 0.8448353601612942,
+          "probability": 0.27797515205620005,
+          "confidenceScore": 0.6906485879971345,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -228,19 +223,18 @@
           "id": "b-1-6",
           "lat": 21.805,
           "lng": 80.23,
-          "probability": 0.6736406936214231,
-          "confidenceScore": 0.8479022985907375,
+          "probability": 0.36895040609045404,
+          "confidenceScore": 0.7063820346163078,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-1-7",
           "lat": 21.805,
           "lng": 80.235,
-          "probability": 0.4646515888379519,
-          "confidenceScore": 0.7145040310180228,
+          "probability": 0.4515387374776949,
+          "confidenceScore": 0.7799964555695503,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -249,8 +243,8 @@
           "id": "b-1-8",
           "lat": 21.805,
           "lng": 80.24000000000001,
-          "probability": 0.31027273468614114,
-          "confidenceScore": 0.6035992090293322,
+          "probability": 0.18452939635242505,
+          "confidenceScore": 0.7264694761447317,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -259,29 +253,29 @@
           "id": "b-1-9",
           "lat": 21.805,
           "lng": 80.245,
-          "probability": 0.8868698698743993,
-          "confidenceScore": 0.8392077388266089,
+          "probability": 0.017439991527089305,
+          "confidenceScore": 0.8521056790932011,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-2-0",
           "lat": 21.810000000000002,
           "lng": 80.2,
-          "probability": 0.48475209765999305,
-          "confidenceScore": 0.680086503780597,
+          "probability": 0.7006253451325412,
+          "confidenceScore": 0.8057784961392944,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-2-1",
           "lat": 21.810000000000002,
           "lng": 80.205,
-          "probability": 0.6200748267342121,
-          "confidenceScore": 0.8444257750840916,
+          "probability": 0.9271632365968044,
+          "confidenceScore": 0.7496608343162663,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -291,19 +285,18 @@
           "id": "b-2-2",
           "lat": 21.810000000000002,
           "lng": 80.21000000000001,
-          "probability": 0.8305923466378807,
-          "confidenceScore": 0.7101858026633985,
+          "probability": 0.5538420822261457,
+          "confidenceScore": 0.6681152981282369,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-2-3",
           "lat": 21.810000000000002,
           "lng": 80.215,
-          "probability": 0.4954312985993793,
-          "confidenceScore": 0.8732545061966448,
+          "probability": 0.1416429968857602,
+          "confidenceScore": 0.7533998111983422,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -312,8 +305,8 @@
           "id": "b-2-4",
           "lat": 21.810000000000002,
           "lng": 80.22,
-          "probability": 0.5318372398032345,
-          "confidenceScore": 0.8280008067634944,
+          "probability": 0.3456748718644076,
+          "confidenceScore": 0.7524279122065846,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -322,30 +315,28 @@
           "id": "b-2-5",
           "lat": 21.810000000000002,
           "lng": 80.22500000000001,
-          "probability": 0.6579857928883388,
-          "confidenceScore": 0.793192284295042,
+          "probability": 0.2702919986876494,
+          "confidenceScore": 0.8145792045006507,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-2-6",
           "lat": 21.810000000000002,
           "lng": 80.23,
-          "probability": 0.6131180005030857,
-          "confidenceScore": 0.7696750280761488,
+          "probability": 0.16360102398159393,
+          "confidenceScore": 0.704402403150582,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-2-7",
           "lat": 21.810000000000002,
           "lng": 80.235,
-          "probability": 0.1774444735244176,
-          "confidenceScore": 0.8305914929206932,
+          "probability": 0.3264751599146227,
+          "confidenceScore": 0.7303993963302353,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -354,8 +345,8 @@
           "id": "b-2-8",
           "lat": 21.810000000000002,
           "lng": 80.24000000000001,
-          "probability": 0.36898967245012115,
-          "confidenceScore": 0.6496386298316346,
+          "probability": 0.012729197551212934,
+          "confidenceScore": 0.6260600022350081,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -364,19 +355,18 @@
           "id": "b-2-9",
           "lat": 21.810000000000002,
           "lng": 80.245,
-          "probability": 0.9138743420448006,
-          "confidenceScore": 0.7155603872435654,
+          "probability": 0.08219397089212199,
+          "confidenceScore": 0.7317625683756253,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-3-0",
           "lat": 21.815,
           "lng": 80.2,
-          "probability": 0.5142675679097249,
-          "confidenceScore": 0.8844599631884942,
+          "probability": 0.06227152542196712,
+          "confidenceScore": 0.7563334458005401,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -385,8 +375,8 @@
           "id": "b-3-1",
           "lat": 21.815,
           "lng": 80.205,
-          "probability": 0.44293081782577215,
-          "confidenceScore": 0.8853468217830976,
+          "probability": 0.279774165264,
+          "confidenceScore": 0.7841767206540746,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -395,19 +385,18 @@
           "id": "b-3-2",
           "lat": 21.815,
           "lng": 80.21000000000001,
-          "probability": 0.6429168165403752,
-          "confidenceScore": 0.8232524482650603,
+          "probability": 0.5254840088076724,
+          "confidenceScore": 0.8013219841388772,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-3-3",
           "lat": 21.815,
           "lng": 80.215,
-          "probability": 0.2846616892121866,
-          "confidenceScore": 0.7739580410774946,
+          "probability": 0.46088532763299306,
+          "confidenceScore": 0.7951921989194974,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -416,8 +405,8 @@
           "id": "b-3-4",
           "lat": 21.815,
           "lng": 80.22,
-          "probability": 0.5609368473374211,
-          "confidenceScore": 0.7678473322872263,
+          "probability": 0.04118166579881988,
+          "confidenceScore": 0.784918362904244,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -426,30 +415,28 @@
           "id": "b-3-5",
           "lat": 21.815,
           "lng": 80.22500000000001,
-          "probability": 0.6741731968756756,
-          "confidenceScore": 0.8131099672705231,
+          "probability": 0.0713933133528667,
+          "confidenceScore": 0.8220256876648935,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-3-6",
           "lat": 21.815,
           "lng": 80.23,
-          "probability": 0.7845213197186308,
-          "confidenceScore": 0.8503050920469108,
+          "probability": 0.07953747893830376,
+          "confidenceScore": 0.7882747305810331,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-3-7",
           "lat": 21.815,
           "lng": 80.235,
-          "probability": 0.4578269014413273,
-          "confidenceScore": 0.6926134921109467,
+          "probability": 0.18978828395485603,
+          "confidenceScore": 0.7592961106199818,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -458,8 +445,8 @@
           "id": "b-3-8",
           "lat": 21.815,
           "lng": 80.24000000000001,
-          "probability": 0.26523893784396757,
-          "confidenceScore": 0.717474975931558,
+          "probability": 0.25629198127570396,
+          "confidenceScore": 0.744395747399506,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -468,8 +455,8 @@
           "id": "b-3-9",
           "lat": 21.815,
           "lng": 80.245,
-          "probability": 0.3177368000895002,
-          "confidenceScore": 0.7580794466032557,
+          "probability": 0.5563285000397734,
+          "confidenceScore": 0.6552706710978645,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -478,8 +465,8 @@
           "id": "b-4-0",
           "lat": 21.82,
           "lng": 80.2,
-          "probability": 0.46075256273663856,
-          "confidenceScore": 0.8835922841321754,
+          "probability": 0.1688894180693834,
+          "confidenceScore": 0.7370218434807962,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -488,8 +475,8 @@
           "id": "b-4-1",
           "lat": 21.82,
           "lng": 80.205,
-          "probability": 0.9998994450823314,
-          "confidenceScore": 0.8023931849797261,
+          "probability": 0.8593402524368239,
+          "confidenceScore": 0.7245905317250941,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -499,18 +486,19 @@
           "id": "b-4-2",
           "lat": 21.82,
           "lng": 80.21000000000001,
-          "probability": 0.2977755216255815,
-          "confidenceScore": 0.7513351815303506,
+          "probability": 0.8355328311621159,
+          "confidenceScore": 0.6797985786115447,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-4-3",
           "lat": 21.82,
           "lng": 80.215,
-          "probability": 0.9237586415324306,
-          "confidenceScore": 0.7160960217407422,
+          "probability": 0.6497335693156979,
+          "confidenceScore": 0.6400733739830238,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -520,8 +508,8 @@
           "id": "b-4-4",
           "lat": 21.82,
           "lng": 80.22,
-          "probability": 0.014594024437960984,
-          "confidenceScore": 0.6542879930224468,
+          "probability": 0.1864319647949806,
+          "confidenceScore": 0.8360348499685917,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -530,18 +518,19 @@
           "id": "b-4-5",
           "lat": 21.82,
           "lng": 80.22500000000001,
-          "probability": 0.2620133678362012,
-          "confidenceScore": 0.8492394707073859,
+          "probability": 0.7474015175928287,
+          "confidenceScore": 0.6672388068456412,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-4-6",
           "lat": 21.82,
           "lng": 80.23,
-          "probability": 0.0770528931271407,
-          "confidenceScore": 0.6037216460659319,
+          "probability": 0.2838688858880448,
+          "confidenceScore": 0.6165268957359977,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -550,19 +539,18 @@
           "id": "b-4-7",
           "lat": 21.82,
           "lng": 80.235,
-          "probability": 0.6574059393596323,
-          "confidenceScore": 0.8984577941599561,
+          "probability": 0.11309484870082931,
+          "confidenceScore": 0.8581464817697081,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-4-8",
           "lat": 21.82,
           "lng": 80.24000000000001,
-          "probability": 0.043366640630852715,
-          "confidenceScore": 0.8213039977610108,
+          "probability": 0.26532250798379853,
+          "confidenceScore": 0.8165936405954477,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -571,18 +559,19 @@
           "id": "b-4-9",
           "lat": 21.82,
           "lng": 80.245,
-          "probability": 0.14379079037036757,
-          "confidenceScore": 0.826608729914421,
+          "probability": 0.7188526705020911,
+          "confidenceScore": 0.8569263288638209,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-5-0",
           "lat": 21.825,
           "lng": 80.2,
-          "probability": 0.14726981527039784,
-          "confidenceScore": 0.786450701388079,
+          "probability": 0.4550848117661609,
+          "confidenceScore": 0.6232260252026275,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -591,29 +580,29 @@
           "id": "b-5-1",
           "lat": 21.825,
           "lng": 80.205,
-          "probability": 0.9351542395591442,
-          "confidenceScore": 0.790262060913588,
+          "probability": 0.4599204151542641,
+          "confidenceScore": 0.8700119912655128,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-5-2",
           "lat": 21.825,
           "lng": 80.21000000000001,
-          "probability": 0.10242823838370241,
-          "confidenceScore": 0.6661559522241907,
+          "probability": 0.642905976276613,
+          "confidenceScore": 0.7121632974533881,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-5-3",
           "lat": 21.825,
           "lng": 80.215,
-          "probability": 0.5862205868358922,
-          "confidenceScore": 0.7858922549650382,
+          "probability": 0.20359871500926585,
+          "confidenceScore": 0.7158147825146935,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -622,29 +611,29 @@
           "id": "b-5-4",
           "lat": 21.825,
           "lng": 80.22,
-          "probability": 0.7304415340994841,
-          "confidenceScore": 0.8410134999952081,
+          "probability": 0.03153876906785269,
+          "confidenceScore": 0.7710541241607719,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-5-5",
           "lat": 21.825,
           "lng": 80.22500000000001,
-          "probability": 0.4996963779997631,
-          "confidenceScore": 0.6973123984361945,
+          "probability": 0.7219271814498133,
+          "confidenceScore": 0.874657622464643,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-5-6",
           "lat": 21.825,
           "lng": 80.23,
-          "probability": 0.054644719281057186,
-          "confidenceScore": 0.7254020051041178,
+          "probability": 0.38862516821836013,
+          "confidenceScore": 0.7830056935134264,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -653,8 +642,8 @@
           "id": "b-5-7",
           "lat": 21.825,
           "lng": 80.235,
-          "probability": 0.12731543481780072,
-          "confidenceScore": 0.6444307720055377,
+          "probability": 0.1460331502400325,
+          "confidenceScore": 0.605193569858165,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -663,28 +652,30 @@
           "id": "b-5-8",
           "lat": 21.825,
           "lng": 80.24000000000001,
-          "probability": 0.33717159329774127,
-          "confidenceScore": 0.6654882168881853,
+          "probability": 0.9013660883995113,
+          "confidenceScore": 0.8039408791118174,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-5-9",
           "lat": 21.825,
           "lng": 80.245,
-          "probability": 0.027407217172184084,
-          "confidenceScore": 0.8250231006490946,
+          "probability": 0.6273832210071553,
+          "confidenceScore": 0.7875446563454576,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-6-0",
           "lat": 21.830000000000002,
           "lng": 80.2,
-          "probability": 0.2759326107966843,
-          "confidenceScore": 0.651324272541327,
+          "probability": 0.44388406780407796,
+          "confidenceScore": 0.6402165396109791,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -693,8 +684,8 @@
           "id": "b-6-1",
           "lat": 21.830000000000002,
           "lng": 80.205,
-          "probability": 0.06348019705997465,
-          "confidenceScore": 0.7796140421378079,
+          "probability": 0.039773744468620476,
+          "confidenceScore": 0.6305440377121607,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -703,8 +694,8 @@
           "id": "b-6-2",
           "lat": 21.830000000000002,
           "lng": 80.21000000000001,
-          "probability": 0.424399959680676,
-          "confidenceScore": 0.6325969551955347,
+          "probability": 0.14931812418092694,
+          "confidenceScore": 0.6584091444491393,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -713,8 +704,8 @@
           "id": "b-6-3",
           "lat": 21.830000000000002,
           "lng": 80.215,
-          "probability": 0.9211229815757389,
-          "confidenceScore": 0.713556202636728,
+          "probability": 0.8420964183709433,
+          "confidenceScore": 0.6407074845822442,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -724,50 +715,50 @@
           "id": "b-6-4",
           "lat": 21.830000000000002,
           "lng": 80.22,
-          "probability": 0.8185879414208097,
-          "confidenceScore": 0.715213066044474,
+          "probability": 0.007433290026380379,
+          "confidenceScore": 0.6338220923479234,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-6-5",
           "lat": 21.830000000000002,
           "lng": 80.22500000000001,
-          "probability": 0.280256623578531,
-          "confidenceScore": 0.8982030579259084,
-          "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
-          ]
-        },
-        {
-          "id": "b-6-6",
-          "lat": 21.830000000000002,
-          "lng": 80.23,
-          "probability": 0.3439221241324991,
-          "confidenceScore": 0.8354323780076487,
-          "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
-          ]
-        },
-        {
-          "id": "b-6-7",
-          "lat": 21.830000000000002,
-          "lng": 80.235,
-          "probability": 0.8647449378370293,
-          "confidenceScore": 0.6327279587737792,
+          "probability": 0.7074195929505177,
+          "confidenceScore": 0.7510024724233524,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
           ]
         },
         {
+          "id": "b-6-6",
+          "lat": 21.830000000000002,
+          "lng": 80.23,
+          "probability": 0.7129588738460965,
+          "confidenceScore": 0.8966617153216058,
+          "contributingFactors": [
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
+          ]
+        },
+        {
+          "id": "b-6-7",
+          "lat": 21.830000000000002,
+          "lng": 80.235,
+          "probability": 0.405954739221266,
+          "confidenceScore": 0.7531507049422284,
+          "contributingFactors": [
+            "Weak spectral signature (Live Sentinel-2)"
+          ]
+        },
+        {
           "id": "b-6-8",
           "lat": 21.830000000000002,
           "lng": 80.24000000000001,
-          "probability": 0.08513722730556939,
-          "confidenceScore": 0.7132290041153789,
+          "probability": 0.08602463609924627,
+          "confidenceScore": 0.8776615072421765,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -776,19 +767,18 @@
           "id": "b-6-9",
           "lat": 21.830000000000002,
           "lng": 80.245,
-          "probability": 0.6253570119216816,
-          "confidenceScore": 0.7178798547186367,
+          "probability": 0.37390144416324567,
+          "confidenceScore": 0.7996636425837015,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-7-0",
           "lat": 21.835,
           "lng": 80.2,
-          "probability": 0.02174148013160404,
-          "confidenceScore": 0.7433327474560367,
+          "probability": 0.39211101165011975,
+          "confidenceScore": 0.8053644912194047,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -797,29 +787,29 @@
           "id": "b-7-1",
           "lat": 21.835,
           "lng": 80.205,
-          "probability": 0.061945967385004796,
-          "confidenceScore": 0.8870452703998717,
-          "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
-          ]
-        },
-        {
-          "id": "b-7-2",
-          "lat": 21.835,
-          "lng": 80.21000000000001,
-          "probability": 0.6817968290416649,
-          "confidenceScore": 0.8377772056422194,
+          "probability": 0.6201335590423781,
+          "confidenceScore": 0.7968875574386859,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
           ]
         },
         {
+          "id": "b-7-2",
+          "lat": 21.835,
+          "lng": 80.21000000000001,
+          "probability": 0.3529256301483872,
+          "confidenceScore": 0.772847820978169,
+          "contributingFactors": [
+            "Weak spectral signature (Live Sentinel-2)"
+          ]
+        },
+        {
           "id": "b-7-3",
           "lat": 21.835,
           "lng": 80.215,
-          "probability": 0.27155174403990967,
-          "confidenceScore": 0.6420622470597939,
+          "probability": 0.1412594230197055,
+          "confidenceScore": 0.7791791863306619,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -828,8 +818,8 @@
           "id": "b-7-4",
           "lat": 21.835,
           "lng": 80.22,
-          "probability": 0.13528898580027726,
-          "confidenceScore": 0.7578756999216717,
+          "probability": 0.05147739587500155,
+          "confidenceScore": 0.8763996896464643,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -838,19 +828,18 @@
           "id": "b-7-5",
           "lat": 21.835,
           "lng": 80.22500000000001,
-          "probability": 0.8226987675407519,
-          "confidenceScore": 0.760148043448643,
+          "probability": 0.11252319544987555,
+          "confidenceScore": 0.7178514925082459,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-7-6",
           "lat": 21.835,
           "lng": 80.23,
-          "probability": 0.5165326437271163,
-          "confidenceScore": 0.8766967491095479,
+          "probability": 0.12908379423017158,
+          "confidenceScore": 0.6475280079635031,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -859,8 +848,8 @@
           "id": "b-7-7",
           "lat": 21.835,
           "lng": 80.235,
-          "probability": 0.8810611412248283,
-          "confidenceScore": 0.8193973915639516,
+          "probability": 0.8693860578734206,
+          "confidenceScore": 0.6944236153579915,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -870,8 +859,8 @@
           "id": "b-7-8",
           "lat": 21.835,
           "lng": 80.24000000000001,
-          "probability": 0.8942049436147844,
-          "confidenceScore": 0.8308188059106363,
+          "probability": 0.8264936644525512,
+          "confidenceScore": 0.8474272482300397,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -881,19 +870,18 @@
           "id": "b-7-9",
           "lat": 21.835,
           "lng": 80.245,
-          "probability": 0.7917985816873285,
-          "confidenceScore": 0.6708438912855472,
+          "probability": 0.5885039074899605,
+          "confidenceScore": 0.8106277928987988,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-8-0",
           "lat": 21.84,
           "lng": 80.2,
-          "probability": 0.5510978811939199,
-          "confidenceScore": 0.7441808148856354,
+          "probability": 0.3290408184556136,
+          "confidenceScore": 0.7902988769888715,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -902,8 +890,8 @@
           "id": "b-8-1",
           "lat": 21.84,
           "lng": 80.205,
-          "probability": 0.5038331108649483,
-          "confidenceScore": 0.7597218079101173,
+          "probability": 0.2005973779692659,
+          "confidenceScore": 0.8061988679883128,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -912,18 +900,19 @@
           "id": "b-8-2",
           "lat": 21.84,
           "lng": 80.21000000000001,
-          "probability": 0.04443466841053445,
-          "confidenceScore": 0.8917791897211107,
+          "probability": 0.9806876665108694,
+          "confidenceScore": 0.8598776412976019,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-8-3",
           "lat": 21.84,
           "lng": 80.215,
-          "probability": 0.6475314303985987,
-          "confidenceScore": 0.6214914075235166,
+          "probability": 0.6132460507521527,
+          "confidenceScore": 0.8929821872016142,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -933,19 +922,18 @@
           "id": "b-8-4",
           "lat": 21.84,
           "lng": 80.22,
-          "probability": 0.691496136874775,
-          "confidenceScore": 0.7234892173952854,
+          "probability": 0.4907324441588333,
+          "confidenceScore": 0.6658947139415743,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-8-5",
           "lat": 21.84,
           "lng": 80.22500000000001,
-          "probability": 0.5671255929811219,
-          "confidenceScore": 0.6889348161879121,
+          "probability": 0.14041476250046447,
+          "confidenceScore": 0.6153589757384362,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -954,40 +942,39 @@
           "id": "b-8-6",
           "lat": 21.84,
           "lng": 80.23,
-          "probability": 0.8711718347882178,
-          "confidenceScore": 0.8644845649575184,
+          "probability": 0.16595304225292018,
+          "confidenceScore": 0.8076130123276286,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-8-7",
           "lat": 21.84,
           "lng": 80.235,
-          "probability": 0.7153827592698758,
-          "confidenceScore": 0.6450456776961242,
+          "probability": 0.3373951674692337,
+          "confidenceScore": 0.8512098738695886,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-8-8",
           "lat": 21.84,
           "lng": 80.24000000000001,
-          "probability": 0.09837204613281081,
-          "confidenceScore": 0.7816125743538316,
+          "probability": 0.9892058955719932,
+          "confidenceScore": 0.8895415971680378,
           "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
+            "High iron-oxide index (Live Sentinel-2)",
+            "Favorable terrain (Live MODIS)"
           ]
         },
         {
           "id": "b-8-9",
           "lat": 21.84,
           "lng": 80.245,
-          "probability": 0.7601768082486521,
-          "confidenceScore": 0.7616037661474602,
+          "probability": 0.8686790262844521,
+          "confidenceScore": 0.8914038712876559,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -997,29 +984,29 @@
           "id": "b-9-0",
           "lat": 21.845000000000002,
           "lng": 80.2,
-          "probability": 0.055078538785140574,
-          "confidenceScore": 0.7349725826859226,
-          "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
-          ]
-        },
-        {
-          "id": "b-9-1",
-          "lat": 21.845000000000002,
-          "lng": 80.205,
-          "probability": 0.9170659295932551,
-          "confidenceScore": 0.6565955637445683,
+          "probability": 0.6972039438269098,
+          "confidenceScore": 0.7639954359914589,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
           ]
         },
         {
+          "id": "b-9-1",
+          "lat": 21.845000000000002,
+          "lng": 80.205,
+          "probability": 0.054650807969950255,
+          "confidenceScore": 0.8075960832414505,
+          "contributingFactors": [
+            "Weak spectral signature (Live Sentinel-2)"
+          ]
+        },
+        {
           "id": "b-9-2",
           "lat": 21.845000000000002,
           "lng": 80.21000000000001,
-          "probability": 0.7110868005657801,
-          "confidenceScore": 0.8297101471023864,
+          "probability": 0.7880743096556321,
+          "confidenceScore": 0.7728993386601613,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -1029,8 +1016,8 @@
           "id": "b-9-3",
           "lat": 21.845000000000002,
           "lng": 80.215,
-          "probability": 0.34918298358580013,
-          "confidenceScore": 0.7014445708979121,
+          "probability": 0.18992083271559201,
+          "confidenceScore": 0.8464065471639324,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -1039,40 +1026,39 @@
           "id": "b-9-4",
           "lat": 21.845000000000002,
           "lng": 80.22,
-          "probability": 0.8222638208154619,
-          "confidenceScore": 0.7253195618449759,
+          "probability": 0.5277942892990214,
+          "confidenceScore": 0.6099181782246776,
           "contributingFactors": [
-            "High iron-oxide index (Live Sentinel-2)",
-            "Favorable terrain (Live MODIS)"
+            "Weak spectral signature (Live Sentinel-2)"
           ]
         },
         {
           "id": "b-9-5",
           "lat": 21.845000000000002,
           "lng": 80.22500000000001,
-          "probability": 0.39738033581934573,
-          "confidenceScore": 0.8389727986395961,
-          "contributingFactors": [
-            "Weak spectral signature (Live Sentinel-2)"
-          ]
-        },
-        {
-          "id": "b-9-6",
-          "lat": 21.845000000000002,
-          "lng": 80.23,
-          "probability": 0.9762666633943945,
-          "confidenceScore": 0.6304424704954505,
+          "probability": 0.9579978558834994,
+          "confidenceScore": 0.7127846937814409,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
           ]
         },
         {
+          "id": "b-9-6",
+          "lat": 21.845000000000002,
+          "lng": 80.23,
+          "probability": 0.5987013635556003,
+          "confidenceScore": 0.8064225299339408,
+          "contributingFactors": [
+            "Weak spectral signature (Live Sentinel-2)"
+          ]
+        },
+        {
           "id": "b-9-7",
           "lat": 21.845000000000002,
           "lng": 80.235,
-          "probability": 0.9364109112321934,
-          "confidenceScore": 0.6906027220758534,
+          "probability": 0.7655253310671082,
+          "confidenceScore": 0.6279446264752913,
           "contributingFactors": [
             "High iron-oxide index (Live Sentinel-2)",
             "Favorable terrain (Live MODIS)"
@@ -1082,8 +1068,8 @@
           "id": "b-9-8",
           "lat": 21.845000000000002,
           "lng": 80.24000000000001,
-          "probability": 0.4689280813966954,
-          "confidenceScore": 0.7424534189744013,
+          "probability": 0.07987400904513131,
+          "confidenceScore": 0.8402930190765538,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
@@ -1092,15 +1078,15 @@
           "id": "b-9-9",
           "lat": 21.845000000000002,
           "lng": 80.245,
-          "probability": 0.5812617043435953,
-          "confidenceScore": 0.7737603833455149,
+          "probability": 0.5937778062651522,
+          "confidenceScore": 0.8400158858669496,
           "contributingFactors": [
             "Weak spectral signature (Live Sentinel-2)"
           ]
         }
       ],
-      "timestamp": 1789538893830
+      "timestamp": 1789539046559
     }
   },
-  "lastPopulated": 1789538893830
+  "lastPopulated": 1789539046559
 }

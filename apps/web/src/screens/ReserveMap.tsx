@@ -4,6 +4,7 @@ import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import DeckGL from '@deck.gl/react';
 import { getSubsurfaceBlockLayers } from './ReserveMap/layers/SubsurfaceBlockLayer';
+import SubsurfaceBlockView from './ReserveMap/SubsurfaceBlockView';
 import { useAdapters } from '../data/adapters/AdapterContext';
 import type { ReserveCell } from '../data/types/models';
 import { motion } from 'framer-motion';
@@ -356,18 +357,8 @@ export const ReserveMap: React.FC = () => {
 
   if (selectedSiteId === 'balaghat') {
     return (
-      <motion.div 
-        variants={motionPresets.fadeIn}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        className="relative w-full h-full bg-black overflow-hidden select-none"
-      >
-        <img 
-          src="/balaghat_demo_map.png" 
-          alt="Balaghat Mines 3D Demo" 
-          className="w-full h-full object-cover object-center" 
-        />
+      <div className="relative w-full h-full bg-black overflow-hidden select-none">
+        <SubsurfaceBlockView />
         {/* Navigation override (invisible until hovered) so we aren't stuck */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 opacity-0 hover:opacity-100 transition-opacity">
           <div className="pointer-events-auto relative shadow-2xl">
@@ -383,7 +374,7 @@ export const ReserveMap: React.FC = () => {
             <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
