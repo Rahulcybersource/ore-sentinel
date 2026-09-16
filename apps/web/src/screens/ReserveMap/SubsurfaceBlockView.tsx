@@ -1,81 +1,178 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html, Edges, Text, useTexture } from '@react-three/drei';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
-import { ChevronDown, Crosshair } from 'lucide-react';
+import { Crosshair } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- DATA & MATERIALS --- //
+// ─── PROCEDURAL SATELLITE CANVAS TEXTURE ────────────────────────────────── //
 
-const ORE_MATERIALS = {
-  ferro: new THREE.MeshPhysicalMaterial({ color: '#10B981', emissive: '#059669', emissiveIntensity: 0.2, roughness: 0.4, metalness: 0.1 }),
-  smgr: new THREE.MeshPhysicalMaterial({ color: '#F59E0B', emissive: '#D97706', emissiveIntensity: 0.2, roughness: 0.5, metalness: 0.1 }),
-  bf: new THREE.MeshPhysicalMaterial({ color: '#D946EF', emissive: '#C026D3', emissiveIntensity: 0.1, roughness: 0.6, metalness: 0.1 }),
-  host: new THREE.MeshPhysicalMaterial({ color: '#1E293B', transparent: true, opacity: 0.25, depthWrite: false, roughness: 0.8 })
-};
+function createSatelliteTexture(): THREE.CanvasTexture {
+  const size = 1024;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
 
-// Generates a parametric U-shape syncline trough of voxels
-function generateOreVoxels() {
-  const voxels = [];
-  const width = 100;
-  const length = 100;
-  const maxVoxels = 2500;
+  // Base terrain (olive-brown earth)
+  ctx.fillStyle = '#3B3424';
+  ctx.fillRect(0, 0, size, size);
+
+  // Random terrain patches (foliage, exposed soil, water)
+  const rng = (min: number, max: number) => Math.random() * (max - min) + min;
+
+  for (let i = 0; i < 600; i++) {
+    const x = rng(0, size);
+    const y = rng(0, size);
+    const r = rng(4, 30);
+    const colors = ['#2D4A2E', '#4A6741', '#5C4033', '#8B7355', '#6B4423', '#3A5F3A', '#2E4E2E'];
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+    ctx.fill();
+  }
+
+  // Open-cast pit scar (central reddish-brown crater)
+  const cx = size / 2;
+  const cy = size / 2;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, 140, 100, -0.3, 0, Math.PI * 2);
+  ctx.fillStyle = '#5C3A1E';
+  ctx.fill();
+
+  // Pit terraces (concentric rings)
+  for (let ring = 0; ring < 5; ring++) {
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 140 - ring * 22, 100 - ring * 16, -0.3, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(139, 90, 43, ${0.6 - ring * 0.1})`;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  // Deepest pit center (dark shadow)
+  ctx.beginPath();
+  ctx.ellipse(cx + 5, cy + 5, 35, 25, -0.3, 0, Math.PI * 2);
+  ctx.fillStyle = '#1A0F08';
+  ctx.fill();
+
+  // Haul roads (light tan lines)
+  ctx.strokeStyle = '#A0896C';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(cx + 140, cy);
+  ctx.lineTo(size - 50, cy - 80);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx - 50, cy + 100);
+  ctx.lineTo(50, size - 100);
+  ctx.stroke();
+
+  // Pit pond (small blue patch)
+  ctx.beginPath();
+  ctx.ellipse(cx + 60, cy + 50, 18, 12, 0.5, 0, Math.PI * 2);
+  ctx.fillStyle = '#1E3A5F';
+  ctx.fill();
+
+  // Noise grain overlay
+  for (let i = 0; i < 8000; i++) {
+    const nx = rng(0, size);
+    const ny = rng(0, size);
+    ctx.fillStyle = `rgba(${rng(0, 50)}, ${rng(0, 40)}, ${rng(0, 30)}, ${rng(0.02, 0.08)})`;
+    ctx.fillRect(nx, ny, 2, 2);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+// ─── ORE MATERIALS (shared, created once) ───────────────────────────────── //
+
+const FERRO_MAT = new THREE.MeshPhysicalMaterial({
+  color: 0x10B981, emissive: 0x059669, emissiveIntensity: 0.35,
+  roughness: 0.35, metalness: 0.15,
+});
+const SMGR_MAT = new THREE.MeshPhysicalMaterial({
+  color: 0xF59E0B, emissive: 0xD97706, emissiveIntensity: 0.25,
+  roughness: 0.4, metalness: 0.1,
+});
+const BF_MAT = new THREE.MeshPhysicalMaterial({
+  color: 0xD946EF, emissive: 0xA21CAF, emissiveIntensity: 0.2,
+  roughness: 0.5, metalness: 0.1,
+});
+
+// ─── VOXEL GENERATION (syncline fold) ───────────────────────────────────── //
+
+interface Voxel {
+  x: number;
+  y: number;
+  z: number;
+  grade: 'ferro' | 'smgr' | 'bf';
+  mnPercent: number;
+}
+
+function generateSynclineVoxels(count: number): Voxel[] {
+  const voxels: Voxel[] = [];
   let attempts = 0;
-  
-  while (voxels.length < maxVoxels && attempts < 100000) {
+
+  while (voxels.length < count && attempts < 200000) {
     attempts++;
-    const x = (Math.random() - 0.5) * width;
-    const y = (Math.random() - 0.5) * length;
-    
-    // Base syncline depth equation (U-shape)
-    const synclineZ = 0.02 * (x * x) - 40;
-    
-    // Dispersion
-    const dispersionZ = (Math.random() - 0.5) * 12;
-    const z = synclineZ + dispersionZ;
-    
-    if (z > 0 || z < -70) continue;
-    
-    let gradeType = 'bf';
-    const depthTrue = z * 5; // Scale to real meters (e.g. -70 = -350m)
-    
-    // Ensure the high-grade core is continuous between -100m and -250m
-    if (depthTrue <= -100 && depthTrue >= -250 && Math.abs(x) < 25) {
-      gradeType = 'ferro';
-    } else if (depthTrue <= -70 && depthTrue >= -270 && Math.abs(x) < 40) {
-      gradeType = 'smgr';
+    const x = (Math.random() - 0.5) * 80; // ±40 units
+    const y = (Math.random() - 0.5) * 80;
+
+    // Parametric syncline fold equation
+    const foldZ = -120 - Math.pow(x / 14, 2) * 8 - Math.pow(y / 18, 2) * 4;
+    const dispersion = (Math.random() - 0.5) * 30;
+    const z = foldZ + dispersion;
+
+    // Reject points outside the block boundaries
+    if (z > -20 || z < -300) continue;
+
+    // Determine grade based on distance from fold axis
+    const distFromCore = Math.abs(z - foldZ);
+    let grade: 'ferro' | 'smgr' | 'bf';
+    let mnPercent: number;
+
+    if (distFromCore < 8) {
+      grade = 'ferro';
+      mnPercent = 44 + Math.random() * 8;
+    } else if (distFromCore < 16) {
+      grade = 'smgr';
+      mnPercent = 30 + Math.random() * 13;
+    } else {
+      grade = 'bf';
+      mnPercent = 12 + Math.random() * 17;
     }
-    
-    voxels.push({ position: [x, z, y] as [number, number, number], type: gradeType });
+
+    voxels.push({ x, y: z / 5, z: y, grade, mnPercent }); // y maps to vertical axis in Three.js
   }
   return voxels;
 }
 
-const oreVoxels = generateOreVoxels();
+const ALL_VOXELS = generateSynclineVoxels(2800);
 
-// --- 3D COMPONENTS --- //
+// ─── 3D SCENE COMPONENTS ────────────────────────────────────────────────── //
 
-const InstancedOre = ({ depthLimit }: { depthLimit: number }) => {
+/** Instanced ore voxels with depth-slice filtering */
+function OreBody({ depthLimit }: { depthLimit: number }) {
   const ferroRef = useRef<THREE.InstancedMesh>(null);
   const smgrRef = useRef<THREE.InstancedMesh>(null);
   const bfRef = useRef<THREE.InstancedMesh>(null);
-  
-  const ferroData = useMemo(() => oreVoxels.filter(v => v.type === 'ferro'), []);
-  const smgrData = useMemo(() => oreVoxels.filter(v => v.type === 'smgr'), []);
-  const bfData = useMemo(() => oreVoxels.filter(v => v.type === 'bf'), []);
-  
+
+  const ferroData = useMemo(() => ALL_VOXELS.filter(v => v.grade === 'ferro'), []);
+  const smgrData = useMemo(() => ALL_VOXELS.filter(v => v.grade === 'smgr'), []);
+  const bfData = useMemo(() => ALL_VOXELS.filter(v => v.grade === 'bf'), []);
+
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  const scaledLimit = depthLimit / 5; // 350 -> 70
 
   useFrame(() => {
-    // Update instances based on depthLimit slice
-    const updateMesh = (ref: React.RefObject<THREE.InstancedMesh>, data: typeof oreVoxels) => {
+    const update = (ref: React.RefObject<THREE.InstancedMesh | null>, data: Voxel[]) => {
       if (!ref.current) return;
       let count = 0;
-      for (let i = 0; i < data.length; i++) {
-        const { position } = data[i];
-        if (position[1] >= -depthLimit / 5) { // Scale down from 350 to 70
-          dummy.position.set(position[0], position[1], position[2]);
-          dummy.scale.setScalar(1);
+      for (const v of data) {
+        if (v.y >= -scaledLimit) {
+          dummy.position.set(v.x, v.y, v.z);
           dummy.updateMatrix();
           ref.current.setMatrixAt(count++, dummy.matrix);
         }
@@ -83,235 +180,248 @@ const InstancedOre = ({ depthLimit }: { depthLimit: number }) => {
       ref.current.count = count;
       ref.current.instanceMatrix.needsUpdate = true;
     };
-    
-    updateMesh(ferroRef, ferroData);
-    updateMesh(smgrRef, smgrData);
-    updateMesh(bfRef, bfData);
+
+    update(ferroRef, ferroData);
+    update(smgrRef, smgrData);
+    update(bfRef, bfData);
   });
+
+  const geo = useMemo(() => new THREE.BoxGeometry(1.8, 1.8, 1.8), []);
 
   return (
     <>
-      <instancedMesh ref={ferroRef} args={[undefined, undefined, ferroData.length]} material={ORE_MATERIALS.ferro}>
-        <boxGeometry args={[1.5, 1.5, 1.5]} />
-      </instancedMesh>
-      <instancedMesh ref={smgrRef} args={[undefined, undefined, smgrData.length]} material={ORE_MATERIALS.smgr}>
-        <boxGeometry args={[1.5, 1.5, 1.5]} />
-      </instancedMesh>
-      <instancedMesh ref={bfRef} args={[undefined, undefined, bfData.length]} material={ORE_MATERIALS.bf}>
-        <boxGeometry args={[1.5, 1.5, 1.5]} />
-      </instancedMesh>
+      <instancedMesh ref={ferroRef} args={[geo, FERRO_MAT, ferroData.length]} />
+      <instancedMesh ref={smgrRef} args={[geo, SMGR_MAT, smgrData.length]} />
+      <instancedMesh ref={bfRef} args={[geo, BF_MAT, bfData.length]} />
     </>
   );
-};
+}
 
-const HostRockBlock = ({ depthLimit, explodedOffset }: { depthLimit: number, explodedOffset: number }) => {
-  const depthZ = depthLimit / 5; // Max 70
-  const yOffset = -depthZ / 2 + explodedOffset;
-  
+/** Back + Bottom + Left bedrock walls (front and right are open for cutaway view) */
+function BedrockWalls({ depthLimit }: { depthLimit: number }) {
+  const h = depthLimit / 5;
+  const wallMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: 0x111827, side: THREE.DoubleSide, transparent: true, opacity: 0.85,
+  }), []);
+  const ghostMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: 0x111827, side: THREE.DoubleSide, transparent: true, opacity: 0.08,
+  }), []);
+  const lineMat = useMemo(() => new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 }), []);
+
   const depthMarks = [-50, -100, -150, -200, -250, -300, -350];
-  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#1E293B', side: THREE.DoubleSide });
 
   return (
-    <group position={[0, yOffset, 0]}>
-      {/* 4 Side Wall Planes */}
-      {/* Front */}
-      <mesh position={[0, 0, 50]} material={sideMaterial}>
-        <planeGeometry args={[100, depthZ]} />
+    <group>
+      {/* BACK wall (solid) */}
+      <mesh position={[0, -h / 2, -50]} material={wallMat}>
+        <planeGeometry args={[100, h]} />
       </mesh>
-      {/* Back */}
-      <mesh position={[0, 0, -50]} material={sideMaterial} rotation={[0, Math.PI, 0]}>
-        <planeGeometry args={[100, depthZ]} />
+      {/* LEFT wall (solid) */}
+      <mesh position={[-50, -h / 2, 0]} rotation={[0, Math.PI / 2, 0]} material={wallMat}>
+        <planeGeometry args={[100, h]} />
       </mesh>
-      {/* Left */}
-      <mesh position={[-50, 0, 0]} material={sideMaterial} rotation={[0, -Math.PI / 2, 0]}>
-        <planeGeometry args={[100, depthZ]} />
-      </mesh>
-      {/* Right */}
-      <mesh position={[50, 0, 0]} material={sideMaterial} rotation={[0, Math.PI / 2, 0]}>
-        <planeGeometry args={[100, depthZ]} />
+      {/* BOTTOM wall (solid) */}
+      <mesh position={[0, -h, 0]} rotation={[Math.PI / 2, 0, 0]} material={wallMat}>
+        <planeGeometry args={[100, 100]} />
       </mesh>
 
-      {/* Depth Marks */}
+      {/* FRONT wall (ghost wireframe cutaway) */}
+      <mesh position={[0, -h / 2, 50]} material={ghostMat}>
+        <planeGeometry args={[100, h]} />
+      </mesh>
+      {/* RIGHT wall (ghost wireframe cutaway) */}
+      <mesh position={[50, -h / 2, 0]} rotation={[0, -Math.PI / 2, 0]} material={ghostMat}>
+        <planeGeometry args={[100, h]} />
+      </mesh>
+
+      {/* Depth graduation lines on the FRONT face */}
       {depthMarks.map(mark => {
-        const yPos = mark / 5; // e.g. -50m is -10 units in Y
-        // Since group is at -depthZ / 2, local Y of a point is its actual Y minus the group's Y.
-        // Actually, the group is at yOffset. So local Y = yPos - explodedOffset
-        // Wait, the group bounds are from +depthZ/2 to -depthZ/2.
-        // Let's just place the marks globally, but parented here.
-        // If the group is centered at -depthZ/2, top is +depthZ/2, bottom is -depthZ/2.
-        // Mark y relative to top (which is Y=0 globally, ignoring explodedOffset):
-        const localY = yPos + depthZ / 2;
-        
-        if (yPos < -depthZ) return null; // Don't show if sliced
-
+        const localY = mark / 5; // e.g. -50m -> -10 units
+        if (Math.abs(localY) > h) return null;
         return (
-          <group key={mark} position={[0, localY, 0]}>
-            {/* Front tick */}
-            <mesh position={[0, 0, 50.1]}>
-              <planeGeometry args={[100, 0.3]} />
-              <meshBasicMaterial color="#ffffff" opacity={0.6} transparent />
-            </mesh>
-            <Text position={[-45, 1.5, 50.2]} fontSize={2.5} color="white" anchorX="left">{mark}m</Text>
+          <group key={`front-${mark}`}>
+            <line_>
+              <bufferGeometry>
+                <bufferAttribute
+                  attach="attributes-position"
+                  array={new Float32Array([-50, localY, 50.05, 50, localY, 50.05])}
+                  count={2}
+                  itemSize={3}
+                />
+              </bufferGeometry>
+              <lineBasicMaterial color="#ffffff" transparent opacity={0.4} />
+            </line_>
+            <Text position={[48, localY + 1.2, 50.1]} fontSize={2} color="white" anchorX="right" fillOpacity={0.7}>
+              {mark}m
+            </Text>
+          </group>
+        );
+      })}
 
-            {/* Left tick */}
-            <mesh position={[-50.1, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-              <planeGeometry args={[100, 0.3]} />
-              <meshBasicMaterial color="#ffffff" opacity={0.6} transparent />
-            </mesh>
-            <Text position={[-50.2, 1.5, -45]} rotation={[0, -Math.PI / 2, 0]} fontSize={2.5} color="white" anchorX="right">{mark}m</Text>
+      {/* Depth graduation lines on the RIGHT face */}
+      {depthMarks.map(mark => {
+        const localY = mark / 5;
+        if (Math.abs(localY) > h) return null;
+        return (
+          <group key={`right-${mark}`}>
+            <line_>
+              <bufferGeometry>
+                <bufferAttribute
+                  attach="attributes-position"
+                  array={new Float32Array([50.05, localY, -50, 50.05, localY, 50])}
+                  count={2}
+                  itemSize={3}
+                />
+              </bufferGeometry>
+              <lineBasicMaterial color="#ffffff" transparent opacity={0.4} />
+            </line_>
+            <Text position={[50.1, localY + 1.2, -48]} rotation={[0, -Math.PI / 2, 0]} fontSize={2} color="white" anchorX="left" fillOpacity={0.7}>
+              {mark}m
+            </Text>
           </group>
         );
       })}
     </group>
   );
-};
+}
 
-const SurfacePlane = ({ onClick, explodedOffset }: { onClick: (pt: THREE.Vector3) => void, explodedOffset: number }) => {
-  // Use suspense-free texture loading or fallback to green terrain
-  const [texture, setTexture] = useState<THREE.Texture | null>(null);
+/** Top terrain surface with procedural satellite texture */
+function TerrainSurface({
+  explodedOffset,
+  onClick,
+}: {
+  explodedOffset: number;
+  onClick: (pt: THREE.Vector3) => void;
+}) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const texture = useMemo(() => createSatelliteTexture(), []);
+  const targetY = useRef(0);
 
-  useEffect(() => {
-    const loader = new THREE.TextureLoader();
-    loader.load('/textures/balaghat-satellite.jpg', (tex) => {
-      setTexture(tex);
-    }, undefined, () => {
-      console.warn('Satellite texture failed to load, using high-contrast terrain fallback.');
-    });
-  }, []);
+  useEffect(() => { targetY.current = explodedOffset; }, [explodedOffset]);
 
-  return (
-    <group position={[0, 0 + explodedOffset, 0]}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} onClick={(e) => onClick(e.point)}>
-        <planeGeometry args={[100, 100]} />
-        {texture ? (
-          <meshBasicMaterial map={texture} />
-        ) : (
-          <meshStandardMaterial color="#2A3A2C" roughness={0.8} />
-        )}
-        {!texture && <Edges scale={1} threshold={15} color="#4ade80" />}
-      </mesh>
-    </group>
-  );
-};
-
-const DrillCore = ({ point }: { point: THREE.Vector3 | null }) => {
-  const ref = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (ref.current && point) {
-      // Animate drill down
-      const targetY = -35;
-      ref.current.position.y = THREE.MathUtils.lerp(ref.current.position.y, targetY, 0.05);
-      ref.current.scale.y = THREE.MathUtils.lerp(ref.current.scale.y, 70, 0.05);
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY.current, 0.06);
     }
   });
 
-  if (!point) return null;
+  return (
+    <mesh
+      ref={meshRef}
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, 0, 0]}
+      onClick={(e) => { e.stopPropagation(); onClick(e.point); }}
+    >
+      <planeGeometry args={[100, 100]} />
+      <meshBasicMaterial map={texture} />
+    </mesh>
+  );
+}
+
+/** Animated drill core laser */
+function DrillLaser({ origin }: { origin: THREE.Vector3 | null }) {
+  const ref = useRef<THREE.Mesh>(null);
+
+  useFrame(() => {
+    if (ref.current && origin) {
+      ref.current.scale.y = THREE.MathUtils.lerp(ref.current.scale.y, 70, 0.04);
+      ref.current.position.y = THREE.MathUtils.lerp(ref.current.position.y, -35, 0.04);
+    }
+  });
+
+  if (!origin) return null;
 
   return (
-    <group position={[point.x, point.y, point.z]}>
+    <group position={[origin.x, origin.y, origin.z]}>
       <mesh ref={ref} position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.5, 0.5, 1, 16]} />
-        <meshBasicMaterial color="#06B6D4" transparent opacity={0.8} />
+        <cylinderGeometry args={[0.35, 0.35, 1, 12]} />
+        <meshBasicMaterial color="#06B6D4" transparent opacity={0.7} />
       </mesh>
-      {/* Laser ring effect */}
-      <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[1, 1.2, 32]} />
-        <meshBasicMaterial color="#06B6D4" side={THREE.DoubleSide} />
+      {/* Surface impact ring */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.8, 1.1, 24]} />
+        <meshBasicMaterial color="#22D3EE" side={THREE.DoubleSide} transparent opacity={0.8} />
       </mesh>
     </group>
   );
-};
+}
 
-// --- MAIN UI COMPONENT --- //
+// ─── MAIN EXPORTED COMPONENT ────────────────────────────────────────────── //
 
 export default function SubsurfaceBlockView() {
   const [depthLimit, setDepthLimit] = useState(350);
   const [exploded, setExploded] = useState(false);
   const [drillPoint, setDrillPoint] = useState<THREE.Vector3 | null>(null);
-  const [interceptMsg, setInterceptMsg] = useState<{ depth: number, grade: string, xp: number } | null>(null);
+  const [intercept, setIntercept] = useState<{ depth: number; grade: string; xp: number } | null>(null);
 
-  const handleSurfaceClick = (pt: THREE.Vector3) => {
+  const handleDrill = useCallback((pt: THREE.Vector3) => {
     setDrillPoint(pt);
-    setInterceptMsg(null);
-    
-    // Simulate drill intercept calculation after 1.5s
+    setIntercept(null);
+
     setTimeout(() => {
-      // Find closest voxel under the click (x, z)
-      const xMatch = oreVoxels.filter(v => Math.abs(v.position[0] - pt.x) < 3 && Math.abs(v.position[2] - pt.z) < 3);
-      let grade = "Barren Host Rock (<10% Mn)";
-      let hitDepth = 250;
-      let xp = 50;
-      
-      if (xMatch.length > 0) {
-        // Grab the highest grade hit
-        const hit = xMatch.reduce((prev, current) => {
-          if (current.type === 'ferro') return current;
-          if (current.type === 'smgr' && prev.type !== 'ferro') return current;
-          return prev;
-        });
-        
-        hitDepth = Math.abs(hit.position[1] * 5); // back to true meters
-        if (hit.type === 'ferro') { grade = "47.8% Mn (Ferro Grade)"; xp = 500; }
-        else if (hit.type === 'smgr') { grade = "36.2% Mn (SMGR Grade)"; xp = 250; }
-        else if (hit.type === 'bf') { grade = "24.1% Mn (Low Grade)"; xp = 100; }
+      // Find closest voxel under click
+      const hits = ALL_VOXELS.filter(v => Math.abs(v.x - pt.x) < 4 && Math.abs(v.z - pt.z) < 4);
+      if (hits.length === 0) {
+        setIntercept({ depth: 200, grade: 'Barren Host Rock (<10% Mn)', xp: 25 });
+        return;
       }
-      
-      setInterceptMsg({ depth: Math.round(hitDepth), grade, xp });
-    }, 1500);
-  };
+      const best = hits.reduce((a, b) => (a.mnPercent > b.mnPercent ? a : b));
+      const depthM = Math.round(Math.abs(best.y * 5));
+      const gradeLabels: Record<string, string> = {
+        ferro: `${best.mnPercent.toFixed(1)}% Mn (Ferro Grade)`,
+        smgr: `${best.mnPercent.toFixed(1)}% Mn (SMGR Grade)`,
+        bf: `${best.mnPercent.toFixed(1)}% Mn (Low Grade)`,
+      };
+      const xpMap: Record<string, number> = { ferro: 500, smgr: 250, bf: 100 };
+      setIntercept({ depth: depthM, grade: gradeLabels[best.grade], xp: xpMap[best.grade] });
+    }, 1400);
+  }, []);
 
   return (
-    <div className="relative w-full h-full bg-navy-950 overflow-hidden font-sans select-none">
-      
-      {/* 3D Canvas Viewport */}
+    <div className="relative w-full h-full bg-[#020617] overflow-hidden font-sans select-none">
+
+      {/* ── THREE.JS CANVAS ── */}
       <div className="absolute inset-0 cursor-crosshair">
-        <Canvas camera={{ position: [80, 60, 80], fov: 45 }}>
+        <Canvas camera={{ position: [90, 50, 90], fov: 42 }} gl={{ antialias: true }}>
           <color attach="background" args={['#020617']} />
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[100, 100, 50]} intensity={1.5} />
-          <directionalLight position={[-100, 50, -50]} intensity={0.5} color="#0ea5e9" />
-          
-          <OrbitControls 
-            target={[0, -20, 0]} 
-            maxPolarAngle={Math.PI / 2 - 0.05} // don't go below ground
-            minDistance={30}
-            maxDistance={200}
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[80, 100, 60]} intensity={1.8} />
+          <directionalLight position={[-60, 40, -40]} intensity={0.4} color="#38bdf8" />
+          <pointLight position={[0, -30, 0]} intensity={0.3} color="#10B981" />
+
+          <OrbitControls
+            target={[0, -25, 0]}
+            maxPolarAngle={Math.PI / 2 - 0.02}
+            minDistance={40}
+            maxDistance={220}
+            enableDamping
+            dampingFactor={0.08}
           />
 
-          <group position={[0, 0, 0]}>
-            {/* The raw Ore Voxels (Static inside space) */}
-            <InstancedOre depthLimit={depthLimit} />
-            
-            {/* Exploding / Culling wrapper for host rock and surface */}
-            <HostRockBlock depthLimit={depthLimit} explodedOffset={exploded ? 20 : 0} />
-            <SurfacePlane onClick={handleSurfaceClick} explodedOffset={exploded ? 20 : 0} />
-            
-            {/* Drilling Interaction */}
-            <DrillCore point={drillPoint} />
-          </group>
-
+          <OreBody depthLimit={depthLimit} />
+          <BedrockWalls depthLimit={depthLimit} />
+          <TerrainSurface explodedOffset={exploded ? 50 : 0} onClick={handleDrill} />
+          <DrillLaser origin={drillPoint} />
         </Canvas>
       </div>
 
-      {/* TOP BAR / NAVIGATION */}
+      {/* ── TOP BAR ── */}
       <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none">
-        <div className="flex items-center justify-between px-5 py-3">
-          <div className="pointer-events-auto flex items-center gap-2 bg-navy-900/80 backdrop-blur-md border border-white/10 rounded-lg px-4 py-2">
+        <div className="flex items-center px-5 py-3">
+          <div className="pointer-events-auto flex items-center gap-2 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-lg px-4 py-2">
             <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            <span className="text-sm font-medium text-slate-100 flex items-center gap-2">
-              BALAGHAT MANGANESE MINE (BHARVELI, MP)
-              <span className="text-lg leading-none">🇮🇳</span>
+            <span className="text-sm font-medium text-slate-100">
+              BALAGHAT MANGANESE MINE (BHARVELI, MP) 🇮🇳
             </span>
           </div>
         </div>
       </div>
 
-      {/* LEFT INTERACTIONS (Depth Slider & Explode) */}
+      {/* ── LEFT CONTROLS ── */}
       <div className="absolute left-6 top-1/2 -translate-y-1/2 z-10 flex flex-col gap-6">
-        {/* Exploded View Toggle */}
-        <div 
-          className={`pointer-events-auto flex flex-col items-center justify-center w-14 h-14 rounded-2xl cursor-pointer transition-all border shadow-lg ${exploded ? 'bg-cyan-500/20 border-cyan-400 text-cyan-400' : 'bg-navy-900/80 border-white/10 text-slate-400 hover:text-white'}`}
+        {/* Explode Toggle */}
+        <div
+          className={`pointer-events-auto flex flex-col items-center justify-center w-14 h-14 rounded-2xl cursor-pointer transition-all border shadow-lg ${exploded ? 'bg-cyan-500/20 border-cyan-400 text-cyan-400' : 'bg-slate-900/80 border-white/10 text-slate-400 hover:text-white'}`}
           onClick={() => setExploded(!exploded)}
         >
           <Crosshair size={20} className={exploded ? 'animate-pulse' : ''} />
@@ -319,101 +429,79 @@ export default function SubsurfaceBlockView() {
         </div>
 
         {/* Depth Slicer */}
-        <div className="pointer-events-auto h-[300px] w-14 bg-navy-900/80 backdrop-blur-md border border-white/10 rounded-full flex flex-col items-center py-5 shadow-2xl">
+        <div className="pointer-events-auto h-[300px] w-14 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full flex flex-col items-center py-5 shadow-2xl">
           <span className="text-[10px] text-white/50 font-bold mb-2">0m</span>
           <div className="relative flex-1 w-full flex items-center justify-center">
-            <input 
+            <input
               type="range"
               min="0"
               max="350"
               value={depthLimit}
               onChange={(e) => setDepthLimit(parseInt(e.target.value))}
-              className="absolute w-[200px] h-1 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 appearance-none bg-slate-700/50 rounded-full cursor-pointer hover:bg-slate-600 transition-colors [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+              className="absolute w-[200px] h-1 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 appearance-none bg-slate-700/50 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(255,255,255,0.5)]"
             />
           </div>
           <span className="text-[10px] text-white/50 font-bold mt-2">-350m</span>
         </div>
       </div>
 
-      {/* RIGHT HUD TACTICAL PANEL */}
+      {/* ── RIGHT HUD ── */}
       <div className="absolute right-6 top-20 z-10 w-72 space-y-4 pointer-events-auto">
         {/* Legend */}
-        <div className="bg-navy-900/85 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl">
+        <div className="bg-slate-900/85 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl">
           <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Legend</h3>
           <div className="space-y-2 text-[10px] font-medium text-slate-200">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm bg-emerald-500" /> High-grade Ferro {'>'}44% Mn
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm bg-amber-500" /> Medium Grade SMGR 30%-43%
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm bg-fuchsia-500" /> Low Grade Blast Furnace {'<'}30%
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm bg-slate-700/50 border border-slate-500" /> Barren host rock
-            </div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-emerald-500" /> High-grade Ferro {'>'}44% Mn</div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-amber-500" /> Medium Grade SMGR 30%-43%</div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-fuchsia-500" /> Low Grade Blast Furnace {'<'}30%</div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-slate-700/50 border border-slate-500" /> Barren host rock</div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="bg-navy-900/85 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl text-xs font-mono text-slate-300 space-y-2">
-          <div className="flex justify-between">
-            <span>AVG Mn% @ -120m:</span>
-            <span className="text-white font-bold">46.5%</span>
-          </div>
-          <div className="flex justify-between">
-            <span>EST. RESERVES:</span>
-            <span className="text-white font-bold">12.4M TONNES</span>
-          </div>
-          <div className="flex justify-between">
-            <span>EST. RES. (2024):</span>
-            <span className="text-white font-bold">11.5M TONNES</span>
-          </div>
+        {/* Metrics */}
+        <div className="bg-slate-900/85 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl text-xs font-mono text-slate-300 space-y-2">
+          <div className="flex justify-between"><span>AVG Mn% @ -120m:</span><span className="text-white font-bold">46.5%</span></div>
+          <div className="flex justify-between"><span>EST. RESERVES:</span><span className="text-white font-bold">12.4M TONNES</span></div>
+          <div className="flex justify-between"><span>EST. RES. (2024):</span><span className="text-white font-bold">11.5M TONNES</span></div>
         </div>
 
-        {/* Depth Profile Chart Stub */}
-        <div className="bg-navy-900/85 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl h-40 flex items-center justify-center relative overflow-hidden">
-          <div className="text-[10px] text-slate-500 absolute top-2 left-2">DEPTH vs GRADE</div>
-          <div className="w-full h-full opacity-30 bg-gradient-to-t from-transparent via-emerald-500/20 to-transparent" />
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <polyline points="0,90 20,70 40,20 60,15 80,40 100,80" fill="none" stroke="#10B981" strokeWidth="2" strokeDasharray="4 2" />
+        {/* Depth vs Grade Profile */}
+        <div className="bg-slate-900/85 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl h-40 relative overflow-hidden">
+          <div className="text-[10px] text-slate-500 absolute top-2 left-3 font-bold uppercase tracking-wider">Depth vs Grade</div>
+          <svg className="absolute inset-0 w-full h-full pt-6" viewBox="0 0 100 80" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gradeGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10B981" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <polygon points="0,75 10,68 25,42 40,18 55,12 70,20 85,50 100,72 100,80 0,80" fill="url(#gradeGrad)" />
+            <polyline points="0,75 10,68 25,42 40,18 55,12 70,20 85,50 100,72" fill="none" stroke="#10B981" strokeWidth="2" />
           </svg>
-        </div>
-
-        {/* Mini Locator */}
-        <div className="bg-navy-900/85 backdrop-blur-md border border-white/10 rounded-xl h-32 relative overflow-hidden flex items-center justify-center">
-           {/* Abstract India Map Shape */}
-           <svg className="w-20 h-20 text-slate-600/50" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-           </svg>
-           <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-cyan-400 -translate-x-1/2 -translate-y-[120%] animate-ping" />
-           <div className="absolute top-1/2 left-1/2 w-3 h-3 rounded-sm border border-cyan-400 -translate-x-1/2 -translate-y-[120%]" />
         </div>
       </div>
 
-      {/* DRILL HUD POPUP */}
+      {/* ── DRILL INTERCEPT POPUP ── */}
       <AnimatePresence>
-        {interceptMsg && (
-          <motion.div 
+        {intercept && (
+          <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
           >
-            <div className="bg-navy-900/90 backdrop-blur-xl border border-cyan-500/50 rounded-2xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.3)] text-center min-w-[300px]">
-              <div className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest mb-1">Drill Intercept Complete</div>
-              <div className="text-2xl font-black text-white mb-2">TARGET @ -{interceptMsg.depth}m</div>
-              <div className="text-sm text-slate-300 font-mono mb-4">{interceptMsg.grade}</div>
-              
+            <div className="bg-slate-900/90 backdrop-blur-xl border border-cyan-500/50 rounded-2xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.3)] text-center min-w-[300px]">
+              <div className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest mb-1">Core Intercept Complete</div>
+              <div className="text-2xl font-black text-white mb-2">CORE INTERCEPT @ -{intercept.depth}m</div>
+              <div className="text-sm text-slate-300 font-mono mb-4">Assay: {intercept.grade}</div>
               <div className="inline-block bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
-                +{interceptMsg.xp} XP
+                Drill Success: +{intercept.xp} XP
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-      
+
     </div>
   );
 }
