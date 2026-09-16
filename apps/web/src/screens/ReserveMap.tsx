@@ -354,6 +354,39 @@ export const ReserveMap: React.FC = () => {
     );
   }
 
+  if (selectedSiteId === 'balaghat') {
+    return (
+      <motion.div 
+        variants={motionPresets.fadeIn}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="relative w-full h-full bg-black overflow-hidden select-none"
+      >
+        <img 
+          src="/balaghat_demo_map.png" 
+          alt="Balaghat Mines 3D Demo" 
+          className="w-full h-full object-cover object-center" 
+        />
+        {/* Navigation override (invisible until hovered) so we aren't stuck */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 opacity-0 hover:opacity-100 transition-opacity">
+          <div className="pointer-events-auto relative shadow-2xl">
+            <select
+              value={selectedSiteId}
+              onChange={(e) => setSelectedSiteId(e.target.value)}
+              className="appearance-none bg-navy-900/90 backdrop-blur-md border border-white/20 text-white text-sm rounded-lg pl-4 pr-10 py-2 outline-none focus:border-cyan-500 cursor-pointer"
+            >
+              <option value="balaghat">Balaghat Mine (MP)</option>
+              <option value="gumgaon">Gumgaon Mine (MH)</option>
+              <option value="kandri">Kandri (MH)</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   // Z-LEVEL 1: 3D SUBSURFACE VOXELS (Deck.GL PointCloud)
   const deckLayers = getSubsurfaceBlockLayers({
     depthRange,
