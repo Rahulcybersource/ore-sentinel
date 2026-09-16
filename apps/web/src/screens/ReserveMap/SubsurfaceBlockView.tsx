@@ -269,7 +269,7 @@ export default function SubsurfaceBlockView() {
       <div className="absolute left-6 top-1/2 -translate-y-1/2 z-10 flex flex-col gap-6">
         {/* Exploded View Toggle */}
         <div 
-          className={\`pointer-events-auto flex flex-col items-center justify-center w-14 h-14 rounded-2xl cursor-pointer transition-all border shadow-lg \${exploded ? 'bg-cyan-500/20 border-cyan-400 text-cyan-400' : 'bg-navy-900/80 border-white/10 text-slate-400 hover:text-white'}\`}
+          className={`pointer-events-auto flex flex-col items-center justify-center w-14 h-14 rounded-2xl cursor-pointer transition-all border shadow-lg ${exploded ? 'bg-cyan-500/20 border-cyan-400 text-cyan-400' : 'bg-navy-900/80 border-white/10 text-slate-400 hover:text-white'}`}
           onClick={() => setExploded(!exploded)}
         >
           <Crosshair size={20} className={exploded ? 'animate-pulse' : ''} />
