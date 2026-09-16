@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
+import { useTexture } from '@react-three/drei';
 import { Crosshair, Award, Layers, Sparkles } from 'lucide-react';
+
+void useTexture;
 
 // ─── TYPES ───────────────────────────────────────────────────────────────── //
 
@@ -19,90 +22,6 @@ interface InterceptData {
   gradeLabel: string;
   mnPercent: number;
   xp: number;
-}
-
-// ─── PROCEDURAL SATELLITE TEXTURE ────────────────────────────────────────── //
-
-function generateSatelliteTexture(): THREE.CanvasTexture {
-  const size = 512;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return new THREE.CanvasTexture(canvas);
-
-  // Dark forest green terrain base
-  ctx.fillStyle = '#1b2f1f';
-  ctx.fillRect(0, 0, size, size);
-
-  // Organic foliage variations
-  const greens = ['#233c27', '#162819', '#2a482d', '#1f3522', '#142517'];
-  for (let i = 0; i < 240; i++) {
-    const x = Math.random() * size;
-    const y = Math.random() * size;
-    const r = Math.random() * 35 + 8;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = greens[Math.floor(Math.random() * greens.length)];
-    ctx.fill();
-  }
-
-  // Reddish-brown open-pit quarry cut
-  const cx = size * 0.52;
-  const cy = size * 0.48;
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(-0.28);
-
-  const pitTones = ['#54361e', '#654124', '#462b17', '#382111', '#28170b'];
-  for (let step = 0; step < 5; step++) {
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 115 - step * 18, 80 - step * 12, 0, 0, Math.PI * 2);
-    ctx.fillStyle = pitTones[step % pitTones.length];
-    ctx.fill();
-    ctx.strokeStyle = '#825528';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-  }
-
-  // Deepest pit crater center
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 26, 17, 0, 0, Math.PI * 2);
-  ctx.fillStyle = '#120b06';
-  ctx.fill();
-
-  // Quarry haul tracks
-  ctx.strokeStyle = '#9c8163';
-  ctx.lineWidth = 3.5;
-  ctx.beginPath();
-  ctx.moveTo(95, 0);
-  ctx.lineTo(size * 0.44, -size * 0.35);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(-80, 35);
-  ctx.lineTo(-size * 0.42, size * 0.38);
-  ctx.stroke();
-
-  // Pit water sump
-  ctx.beginPath();
-  ctx.ellipse(50, 42, 18, 11, 0.4, 0, Math.PI * 2);
-  ctx.fillStyle = '#1c3944';
-  ctx.fill();
-
-  ctx.restore();
-
-  // Surface texture noise
-  for (let i = 0; i < 3500; i++) {
-    const nx = Math.random() * size;
-    const ny = Math.random() * size;
-    ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.1})`;
-    ctx.fillRect(nx, ny, 2, 2);
-  }
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
 }
 
 // ─── COMPONENT ──────────────────────────────────────────────────────────── //
@@ -275,12 +194,13 @@ export default function SubsurfaceBlockView() {
       const tickLines = new THREE.LineSegments(tickGeo, tickMat);
       scene.add(tickLines);
 
-      // 5. Top Surface Plane with Procedural Satellite Texture
-      const satTexture = generateSatelliteTexture();
+      // 5. Top Surface Plane with Real Satellite Texture
+      const textureLoader = new THREE.TextureLoader();
+      const satTexture = textureLoader.load('/textures/balaghat-satellite-real.jpg');
+      satTexture.colorSpace = THREE.SRGBColorSpace;
       const topMat = new THREE.MeshStandardMaterial({
         map: satTexture,
-        roughness: 0.8,
-        metalness: 0.05
+        roughness: 0.8
       });
       const topMesh = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), topMat);
       topMesh.rotation.x = -Math.PI / 2;
