@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html, Edges } from '@react-three/drei';
+import { OrbitControls, Html, Edges, Text, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { ChevronDown, Crosshair } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,35 +19,34 @@ function generateOreVoxels() {
   const voxels = [];
   const width = 100;
   const length = 100;
-  const resolution = 2; // Step size
+  const maxVoxels = 2500;
+  let attempts = 0;
   
-  for (let x = -width / 2; x < width / 2; x += resolution) {
-    for (let y = -length / 2; y < length / 2; y += resolution) {
-      // Base syncline depth equation (U-shape)
-      const synclineZ = 0.02 * (x * x) - 40;
-      
-      // Random dispersion
-      for (let i = 0; i < 3; i++) {
-        const dispersionZ = (Math.random() - 0.5) * 15;
-        const z = synclineZ + dispersionZ;
-        
-        if (z > 0 || z < -70) continue;
-        
-        let gradeType = 'bf';
-        const depthTrue = z * 5; // Scale to real meters (e.g. -70 = -350m)
-        
-        if (depthTrue <= -120 && depthTrue >= -180 && Math.abs(x) < 20) {
-          gradeType = 'ferro';
-        } else if (depthTrue <= -80 && depthTrue >= -220 && Math.abs(x) < 35) {
-          gradeType = 'smgr';
-        }
-        
-        // Culling some points for performance & organic look
-        if (Math.random() > 0.4) continue;
-        
-        voxels.push({ position: [x, z, y] as [number, number, number], type: gradeType });
-      }
+  while (voxels.length < maxVoxels && attempts < 100000) {
+    attempts++;
+    const x = (Math.random() - 0.5) * width;
+    const y = (Math.random() - 0.5) * length;
+    
+    // Base syncline depth equation (U-shape)
+    const synclineZ = 0.02 * (x * x) - 40;
+    
+    // Dispersion
+    const dispersionZ = (Math.random() - 0.5) * 12;
+    const z = synclineZ + dispersionZ;
+    
+    if (z > 0 || z < -70) continue;
+    
+    let gradeType = 'bf';
+    const depthTrue = z * 5; // Scale to real meters (e.g. -70 = -350m)
+    
+    // Ensure the high-grade core is continuous between -100m and -180m
+    if (depthTrue <= -100 && depthTrue >= -180 && Math.abs(x) < 22) {
+      gradeType = 'ferro';
+    } else if (depthTrue <= -70 && depthTrue >= -220 && Math.abs(x) < 38) {
+      gradeType = 'smgr';
     }
+    
+    voxels.push({ position: [x, z, y] as [number, number, number], type: gradeType });
   }
   return voxels;
 }
@@ -107,35 +106,89 @@ const InstancedOre = ({ depthLimit }: { depthLimit: number }) => {
 
 const HostRockBlock = ({ depthLimit, explodedOffset }: { depthLimit: number, explodedOffset: number }) => {
   const depthZ = depthLimit / 5; // Max 70
+  const yOffset = -depthZ / 2 + explodedOffset;
   
+  const depthMarks = [-50, -100, -150, -200, -250, -300, -350];
+  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#1E293B', opacity: 0.85, transparent: true, side: THREE.DoubleSide });
+
   return (
-    <group position={[0, -depthZ / 2 + explodedOffset, 0]}>
-      <mesh material={ORE_MATERIALS.host}>
-        <boxGeometry args={[100, depthZ, 100]} />
-        <Edges scale={1} threshold={15} color="#334155" />
-      </mesh>
-      
-      {/* Grid Lines on the side */}
-      <mesh position={[-50.1, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+    <group position={[0, yOffset, 0]}>
+      {/* 4 Side Wall Planes */}
+      {/* Front */}
+      <mesh position={[0, 0, 50]} material={sideMaterial}>
         <planeGeometry args={[100, depthZ]} />
-        <meshBasicMaterial color="#0ea5e9" wireframe opacity={0.1} transparent />
       </mesh>
-      <mesh position={[0, 0, 50.1]}>
+      {/* Back */}
+      <mesh position={[0, 0, -50]} material={sideMaterial} rotation={[0, Math.PI, 0]}>
         <planeGeometry args={[100, depthZ]} />
-        <meshBasicMaterial color="#0ea5e9" wireframe opacity={0.1} transparent />
       </mesh>
+      {/* Left */}
+      <mesh position={[-50, 0, 0]} material={sideMaterial} rotation={[0, -Math.PI / 2, 0]}>
+        <planeGeometry args={[100, depthZ]} />
+      </mesh>
+      {/* Right */}
+      <mesh position={[50, 0, 0]} material={sideMaterial} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[100, depthZ]} />
+      </mesh>
+
+      {/* Depth Marks */}
+      {depthMarks.map(mark => {
+        const yPos = mark / 5; // e.g. -50m is -10 units in Y
+        // Since group is at -depthZ / 2, local Y of a point is its actual Y minus the group's Y.
+        // Actually, the group is at yOffset. So local Y = yPos - explodedOffset
+        // Wait, the group bounds are from +depthZ/2 to -depthZ/2.
+        // Let's just place the marks globally, but parented here.
+        // If the group is centered at -depthZ/2, top is +depthZ/2, bottom is -depthZ/2.
+        // Mark y relative to top (which is Y=0 globally, ignoring explodedOffset):
+        const localY = yPos + depthZ / 2;
+        
+        if (yPos < -depthZ) return null; // Don't show if sliced
+
+        return (
+          <group key={mark} position={[0, localY, 0]}>
+            {/* Front tick */}
+            <mesh position={[0, 0, 50.1]}>
+              <planeGeometry args={[100, 0.3]} />
+              <meshBasicMaterial color="#ffffff" opacity={0.6} transparent />
+            </mesh>
+            <Text position={[-45, 1.5, 50.2]} fontSize={2.5} color="white" anchorX="left">{mark}m</Text>
+
+            {/* Left tick */}
+            <mesh position={[-50.1, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+              <planeGeometry args={[100, 0.3]} />
+              <meshBasicMaterial color="#ffffff" opacity={0.6} transparent />
+            </mesh>
+            <Text position={[-50.2, 1.5, -45]} rotation={[0, -Math.PI / 2, 0]} fontSize={2.5} color="white" anchorX="right">{mark}m</Text>
+          </group>
+        );
+      })}
     </group>
   );
 };
 
 const SurfacePlane = ({ onClick, explodedOffset }: { onClick: (pt: THREE.Vector3) => void, explodedOffset: number }) => {
+  // Use suspense-free texture loading or fallback to green terrain
+  const [texture, setTexture] = useState<THREE.Texture | null>(null);
+
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    loader.load('/balaghat_demo_map.png', (tex) => {
+      setTexture(tex);
+    }, undefined, () => {
+      console.warn('Satellite texture failed to load, using high-contrast terrain fallback.');
+    });
+  }, []);
+
   return (
     <group position={[0, 0 + explodedOffset, 0]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} onClick={(e) => onClick(e.point)}>
         <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="#2d3748" roughness={0.9} />
-        {/* Mock surface satellite imagery via simple grid for now */}
-        <Edges scale={1} threshold={15} color="#4ade80" />
+        {texture ? (
+          <meshBasicMaterial map={texture} />
+        ) : (
+          <meshStandardMaterial color="#2A3A2C" roughness={0.8} />
+        )}
+        {!texture && <Edges scale={1} threshold={15} color="#4ade80" />}
       </mesh>
       
       {/* Labels */}
