@@ -101,27 +101,14 @@ export const AssayMarkersLayer: React.FC<AssayMarkersLayerProps> = ({ gridData, 
         </Marker>
       ))}
 
-      {/* ── TEXT LABELS: Mn% next to every assay point (native symbol layer) ── */}
-      <Source id="assay-labels-src" type="geojson" data={allPointsGeoJSON}>
-        <Layer
-          id="assay-labels"
-          type="symbol"
-          layout={{
-            'text-field': ['concat', ['to-string', ['get', 'mnGrade']], '% Mn'],
-            'text-size': 10,
-            'text-offset': [1.2, 0],
-            'text-anchor': 'left',
-            'text-allow-overlap': false,
-            'text-ignore-placement': false,
-            'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-          }}
-          paint={{
-            'text-color': '#e2e8f0',
-            'text-halo-color': 'rgba(11, 18, 32, 0.8)',
-            'text-halo-width': 1.5,
-          }}
-        />
-      </Source>
+      {/* ── TEXT LABELS: Mn% next to assay points (HTML Markers to guarantee rendering) ── */}
+      {gridData.filter(pt => pt.tier === 'high' || pt.tier === 'medium').map((pt, i) => (
+        <Marker key={`label-${i}`} latitude={pt.realLat} longitude={pt.realLng} anchor="left">
+          <div className="text-[#e2e8f0] text-[9px] font-mono font-bold ml-2.5 drop-shadow-[0_1px_2px_rgba(0,0,0,1)] select-none pointer-events-none" style={{ textShadow: '0 0 3px #000, 0 0 3px #000' }}>
+            {pt.mnGrade.toFixed(1)}% Mn
+          </div>
+        </Marker>
+      ))}
     </>
   );
 };

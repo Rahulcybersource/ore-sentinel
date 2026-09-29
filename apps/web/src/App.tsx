@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
 import { StyleGuide } from './screens/StyleGuide';
 import { Dashboard } from './screens/Dashboard';
+import { Intelligence } from './screens/Intelligence';
 import { ReserveMap } from './screens/ReserveMap';
 import { Production } from './screens/Production';
 import { Alerts } from './screens/Alerts';
@@ -13,8 +14,8 @@ import { SatelliteView } from './screens/SatelliteView';
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<AppShell />}>
-        <Route index element={<Dashboard />} />
+      <Route path="/" element={<Dashboard />} />
+      <Route element={<AppShell />}>
         <Route path="map" element={<ReserveMap />} />
         <Route path="production" element={<Production />} />
         <Route path="alerts" element={<Alerts />} />
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="satellite" element={<SatelliteView />} />
         <Route path="style-guide" element={<StyleGuide />} />
       </Route>
+      <Route path="/intelligence" element={<Intelligence />} />
     </Routes>
   );
 }

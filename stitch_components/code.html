@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MANGANEX — AI &amp; Space Technology Decision-Support Platform for MOIL Limited</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            moil: {
+              primary: '#0B3B24',
+              accent: '#B45309',
+              gold: '#D97706',
+              surface: '#F8F7F4',
+              card: '#FFFFFF',
+              border: '#E6E4DF',
+              dark: '#1E293B',
+              slate: '#475569',
+              crimson: '#BE123C',
+              emerald: '#047857'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+          },
+          boxShadow: {
+            'glass': '0 8px 32px 0 rgba(15, 23, 42, 0.08), 0 1px 3px 0 rgba(15, 23, 42, 0.04)',
+            'glass-subtle': '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+            'elevated': '0 20px 40px -15px rgba(11, 59, 36, 0.12)'
+          }
+        }
+      }
+    }
+  </script>
+<!-- Typography & Global Surface Styles -->
+<style data-purpose="typography">
+    body {
+      background-color: #F3F1EC;
+      color: #1E293B;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      overflow-x: hidden;
+    }
+    .font-mono-numbers {
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+<!-- 3D Spatial Perspective & Visual Mesh Styles -->
+<style data-purpose="3d-perspective-styling">
+    .spatial-scene-container {
+      perspective: 1200px;
+      perspective-origin: 50% 40%;
+    }
+    .spatial-terrain-stage {
+      transform-style: preserve-3d;
+      transform: rotateX(46deg) rotateZ(-18deg) scale3d(1.05, 1.05, 1.05);
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .spatial-terrain-stage.view-topdown {
+      transform: rotateX(0deg) rotateZ(0deg) scale3d(1, 1, 1);
+    }
+    .spatial-terrain-stage.view-stratigraphy {
+      transform: rotateX(65deg) rotateZ(-38deg) scale3d(1.15, 1.15, 1.15);
+    }
+    .strata-block {
+      transform-style: preserve-3d;
+    }
+    .pin-3d {
+      transform-style: preserve-3d;
+      transform: rotateZ(18deg) rotateX(-46deg) translateY(-28px);
+      transition: transform 0.3s ease;
+    }
+    .pin-3d:hover {
+      transform: rotateZ(18deg) rotateX(-46deg) translateY(-38px) scale(1.05);
+    }
+    .drillhole-cylinder {
+      transform-style: preserve-3d;
+    }
+    /* Radar Scan Animation Effect */
+    @keyframes radarSweep {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .radar-sweep-effect {
+      animation: radarSweep 14s linear infinite;
+    }
+    /* Pulse Rings */
+    @keyframes radarPulse {
+      0% { transform: scale(0.6); opacity: 0.9; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+    .pulse-ring {
+      animation: radarPulse 3s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+    }
+  </style>
+<!-- Glassmorphism Styles -->
+<style data-purpose="glassmorphic-materials">
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+    }
+    .glass-card-dark {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1EFEA;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased select-none text-slate-800">
+<!-- BEGIN: MainHeader -->
+<header class="w-full bg-[#FAF9F5] border-b border-stone-200/90 sticky top-0 z-50 px-4 lg:px-8 py-2.5 shadow-sm" data-purpose="institutional-header">
+<div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-4">
+<!-- Institutional Identity & Insignia -->
+<div class="flex items-center space-x-3.5">
+<div class="flex items-center space-x-3">
+<!-- Tricolor Bar Accent -->
+<div class="w-1.5 h-10 rounded-full bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#138808] border border-stone-300"></div>
+<!-- Emblem & MOIL Logo Unit -->
+<div class="flex items-center space-x-2.5">
+<div class="w-10 h-10 rounded-xl bg-moil-primary flex items-center justify-center text-white shadow-md font-black text-xl tracking-tighter">
+<span class="text-amber-400">M</span>X
+            </div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-extrabold text-base tracking-tight text-slate-900">MANGANEX</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-100 text-amber-900 border border-amber-300">DEMO MODE • SIH26009</span>
+</div>
+<p class="text-[11px] text-slate-500 font-medium leading-none mt-0.5">
+                Ministry of Steel, Govt of India • MOIL Limited Decision-Support Platform
+              </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Space & Ground Telemetry Feeds -->
+<!-- BEGIN: TelemetryBar -->
+<div class="hidden xl:flex items-center space-x-3 text-xs bg-white/70 py-1.5 px-3.5 rounded-xl border border-stone-200 shadow-sm" data-purpose="telemetry-bar">
+<!-- Sentinel-2 Status -->
+<div class="flex items-center space-x-1.5 pr-3 border-r border-stone-200">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="text-[11px] text-slate-600 font-medium">Copernicus Sentinel-2 SWIR:</span>
+<span class="text-[11px] font-semibold text-emerald-800">Pass 18m ago (T-07 Alteration Sync)</span>
+</div>
+<!-- MODIS Soil Moisture -->
+<div class="flex items-center space-x-1.5 pr-3 border-r border-stone-200">
+<svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[11px] text-slate-600 font-medium">NASA MODIS LST:</span>
+<span class="text-[11px] font-semibold text-slate-800">31.4°C Dry Track (Haulage Normal)</span>
+</div>
+<!-- Pilot Sector -->
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span class="text-[11px] text-slate-500">Grid:</span>
+<span class="text-[11px] font-bold text-slate-700">Balaghat Deep - Dongri Buzurg - Ukwa</span>
+</div>
+</div>
+<!-- END: TelemetryBar -->
+<!-- Main Navigation Modules -->
+<nav class="flex items-center space-x-1 bg-stone-100/80 p-1 rounded-xl border border-stone-200/80 text-xs font-semibold" data-purpose="module-navigation">
+<button class="px-3.5 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm border border-stone-200/80 flex items-center space-x-1.5 transition" id="nav-btn-spatial">
+<svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Spatial Reserves</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition flex items-center space-x-1.5" id="nav-btn-resource">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Resource 6.8 Mt</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition flex items-center space-x-1.5" id="nav-btn-production">
+<svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Production (-7.3% Gap)</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition flex items-center space-x-1.5" id="nav-btn-scenarios">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>What-If Sim</span>
+</button>
+</nav>
+<!-- Action & Voice AI Directive Trigger -->
+<div class="flex items-center space-x-2.5">
+<button class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs flex items-center space-x-2 shadow-sm transition active:scale-95" title="Ask MANGANEX AI Assistant">
+<svg class="w-3.5 h-3.5 text-amber-400 animate-pulse" fill="currentColor" viewbox="0 0 20 20">
+<path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"></path>
+</svg>
+<span>Ask MANGANEX AI</span>
+</button>
+<!-- User Badge -->
+<div class="flex items-center space-x-2 pl-2 border-l border-stone-200">
+<div class="w-8 h-8 rounded-full bg-moil-primary/10 border border-moil-primary/20 flex items-center justify-center text-xs font-bold text-moil-primary">
+            CGM
+          </div>
+<div class="hidden sm:block text-left text-xs leading-none">
+<p class="font-bold text-slate-800">Chief Gen. Manager</p>
+<p class="text-[10px] text-slate-500">MOIL Balaghat Core</p>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainDashboardWorkspace -->
+<main class="flex-1 flex flex-col relative overflow-hidden" data-purpose="primary-workspace">
+<!-- Top Floating Filter & Context Pill Ribbon -->
+<div class="w-full px-6 py-2.5 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+<!-- Left Pill: Active Sector & Coordinates -->
+<div class="flex items-center space-x-2 pointer-events-auto">
+<div class="glass-pill px-3 py-1.5 rounded-full flex items-center space-x-2 shadow-glass-subtle text-xs text-slate-700 font-medium">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>Sausar Mobile Belt (Balaghat NE Extension Target T-07)</span>
+<span class="text-slate-400">|</span>
+<span class="font-mono text-slate-500 text-[11px]">21.8048° N, 80.1834° E</span>
+</div>
+<div class="glass-pill px-2.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 flex items-center space-x-1 shadow-glass-subtle cursor-pointer hover:bg-white">
+<svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Switch Pit: Dongri Buzurg</span>
+</div>
+</div>
+<!-- Right Pill: Exploration & Mine Alert Banner -->
+<div class="flex items-center space-x-2 pointer-events-auto">
+<div class="glass-pill px-3.5 py-1.5 rounded-full border-rose-200 bg-rose-50/90 text-rose-900 text-xs font-semibold flex items-center space-x-2 shadow-glass-subtle">
+<span class="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+<span>Monthly Gap Alert: -3,800 Tonnes (-7.3%) • Day 21/30</span>
+</div>
+<button class="glass-pill px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-800 bg-white hover:bg-stone-50 transition shadow-glass-subtle flex items-center space-x-1.5" onclick="toggleAnalyticsTray()">
+<span>Operational Tray</span>
+<svg class="w-4 h-4 text-slate-500 transform transition-transform" fill="none" id="tray-toggle-chevron" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- Central Interactive 3D Spatial Canvas + Side Overlays -->
+<div class="relative flex-1 w-full h-[720px] lg:h-[780px] overflow-hidden flex" data-purpose="spatial-map-container">
+<!-- BEGIN: LeftFloatingControlDock -->
+<!-- Floating Layer Switcher & GIS Controls -->
+<div class="absolute left-6 top-4 z-30 w-72 flex flex-col space-y-3 pointer-events-auto" data-purpose="geological-layer-toggles">
+<!-- Primary Layer Toggles Glass Card -->
+<div class="glass-panel p-4 rounded-2xl shadow-glass border border-white/80">
+<div class="flex items-center justify-between pb-3 border-b border-stone-200/80">
+<div class="flex items-center space-x-2">
+<div class="p-1.5 bg-emerald-100 rounded-lg text-emerald-800">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h2 class="font-bold text-xs text-slate-800 uppercase tracking-wider">GIS Strata Layers</h2>
+</div>
+<span class="text-[10px] font-bold px-2 py-0.5 bg-stone-200/70 text-slate-700 rounded-full font-mono">6/8 ON</span>
+</div>
+<!-- Layer Checklist -->
+<div class="mt-3 space-y-2 text-xs">
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-stone-100/70 cursor-pointer">
+<span class="flex items-center space-x-2">
+<input checked="" class="rounded text-moil-primary focus:ring-moil-primary border-stone-300" type="checkbox"/>
+<span class="font-medium text-slate-700">Sentinel-2 SWIR Alteration</span>
+</span>
+<span class="w-3 h-3 rounded-full bg-violet-500/80 shadow-sm" title="Infrared Spectral Absorption Band"></span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-stone-100/70 cursor-pointer">
+<span class="flex items-center space-x-2">
+<input checked="" class="rounded text-moil-primary border-stone-300" type="checkbox"/>
+<span class="font-medium text-slate-700">Mansar Schist &amp; Gondite Horizon</span>
+</span>
+<span class="w-3 h-3 rounded-full bg-amber-500/80 shadow-sm" title="Manganese Host Horizon"></span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-stone-100/70 cursor-pointer">
+<span class="flex items-center space-x-2">
+<input checked="" class="rounded text-moil-primary border-stone-300" type="checkbox"/>
+<span class="font-medium text-slate-700">Core Assay Intercepts (&gt;20% Mn)</span>
+</span>
+<span class="w-3 h-3 rounded-full bg-emerald-500/80 shadow-sm" title="Verified Borehole Striking Points"></span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-stone-100/70 cursor-pointer">
+<span class="flex items-center space-x-2">
+<input checked="" class="rounded text-moil-primary border-stone-300" type="checkbox"/>
+<span class="font-medium text-slate-700">Ordinary Kriging Variance Mesh</span>
+</span>
+<span class="w-3 h-3 rounded-full bg-blue-500/80 shadow-sm"></span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-stone-100/70 cursor-pointer">
+<span class="flex items-center space-x-2">
+<input class="rounded text-moil-primary border-stone-300" type="checkbox"/>
+<span class="font-medium text-slate-500">Pit Incline Drainage &amp; Waterways</span>
+</span>
+<span class="w-3 h-3 rounded-full bg-cyan-400/60 shadow-sm"></span>
+</label>
+</div>
+<!-- Perspective Preset Quick Selectors -->
+<div class="mt-4 pt-3 border-t border-stone-200/80 flex items-center justify-between">
+<span class="text-[10px] text-slate-500 font-semibold uppercase">Viewport Camera:</span>
+<div class="flex space-x-1">
+<button class="px-2 py-1 text-[11px] rounded bg-white shadow-sm font-bold text-slate-700 hover:bg-stone-50 border border-stone-200" onclick="setCameraView('3d')">3D Angled</button>
+<button class="px-2 py-1 text-[11px] rounded bg-stone-100 text-slate-600 hover:bg-white hover:shadow-sm" onclick="setCameraView('topdown')">Nadir 2D</button>
+<button class="px-2 py-1 text-[11px] rounded bg-stone-100 text-slate-600 hover:bg-white hover:shadow-sm" onclick="setCameraView('stratigraphy')">Cutaway</button>
+</div>
+</div>
+</div>
+<!-- Grade Legend Glass Card -->
+<div class="glass-panel p-3.5 rounded-2xl shadow-glass border border-white/80 text-xs">
+<div class="flex items-center justify-between mb-2">
+<span class="font-bold text-[11px] uppercase tracking-wider text-slate-700">Manganese Grade Spectrum</span>
+<span class="text-[10px] text-slate-500">UNFC Code 111/122</span>
+</div>
+<div class="h-2.5 w-full rounded-full bg-gradient-to-r from-stone-300 via-amber-400 via-emerald-500 to-indigo-600 shadow-inner"></div>
+<div class="flex justify-between text-[10px] font-mono text-slate-600 mt-1.5 font-bold">
+<span>&lt; 20% (Low)</span>
+<span>35% (Medium)</span>
+<span>44% (Ferro Grade)</span>
+<span class="text-indigo-700 font-extrabold">&gt; 50% Mn (Battery)</span>
+</div>
+</div>
+</div>
+<!-- END: LeftFloatingControlDock -->
+<!-- BEGIN: 3DSpatialCanvas -->
+<!-- The Stylized CSS 3D Digital Twin Viewport -->
+<div class="spatial-scene-container w-full h-full flex items-center justify-center relative cursor-grab active:cursor-grabbing bg-gradient-to-b from-[#F2F0EB] via-[#ECE9E0] to-[#E5E1D5]" data-purpose="terrain-viewport">
+<!-- Ambient Topographic Grid Ring Background -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+<div class="w-[850px] h-[850px] border border-dashed border-stone-400 rounded-full radar-sweep-effect flex items-center justify-center">
+<div class="w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-600/30 to-transparent"></div>
+</div>
+<div class="absolute w-[600px] h-[600px] border border-stone-300 rounded-full"></div>
+<div class="absolute w-[400px] h-[400px] border border-stone-300 rounded-full"></div>
+</div>
+<!-- The 3D Rotated Terrain Stage -->
+<div class="spatial-terrain-stage relative w-[820px] h-[680px]" id="spatialStage">
+<!-- Base Ground / Contour Plate -->
+<div class="absolute inset-0 rounded-3xl bg-[#DFDBD0] shadow-2xl border-4 border-white/70 overflow-hidden" style="transform: translateZ(-30px);">
+<!-- Isometric Grid Lines -->
+<div class="w-full h-full opacity-35 bg-[radial-gradient(#64748b_1px,transparent_1px)] [background-size:24px_24px]"></div>
+<!-- Sausar Group Geological Formation Color Bands -->
+<svg class="absolute inset-0 w-full h-full opacity-45" fill="none" viewbox="0 0 820 680">
+<!-- Mansar Formation Belt -->
+<path d="M 50,150 C 220,100 450,220 780,140 L 800,320 C 520,380 280,260 50,380 Z" fill="#E2D9C8"></path>
+<!-- Gondite Manganese Lens Strike Zone -->
+<path d="M 120,240 C 310,210 520,310 760,260 L 780,410 C 510,480 300,360 90,440 Z" fill="#CBD5E1" stroke="#94A3B8" stroke-dasharray="4 4" stroke-width="1.5"></path>
+<!-- Structural Shear Corridor -->
+<line opacity="0.6" stroke="#DC2626" stroke-dasharray="8 6" stroke-width="2" x1="80" x2="740" y1="180" y2="520"></line>
+<!-- Topographic Contours -->
+<path d="M 200,450 Q 400,300 620,490" fill="none" stroke="#A8A29E" stroke-width="1.5"></path>
+<path d="M 160,490 Q 420,340 680,530" fill="none" stroke="#A8A29E" stroke-dasharray="2 3" stroke-width="1"></path>
+</svg>
+</div>
+<!-- Raised Geological Ore Blocks (3D Prisms) -->
+<!-- Block 1: Target T-07 Balaghat North-East Extension Ore Lens -->
+<div class="strata-block absolute left-[310px] top-[210px] w-48 h-36 rounded-xl bg-gradient-to-tr from-purple-900/40 via-purple-700/60 to-purple-500/80 border-2 border-purple-300/80 shadow-2xl backdrop-blur-sm" style="transform: translateZ(55px);">
+<!-- High Grade Inner Core Block -->
+<div class="w-full h-full relative p-2 flex flex-col justify-between text-white">
+<div class="flex items-center justify-between">
+<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/40 font-bold border border-white/20">LENS #07-NE</span>
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+</div>
+<div class="text-center py-1">
+<span class="text-xs font-black tracking-tight drop-shadow">51.3% Mn</span>
+<p class="text-[9px] text-purple-200">Battery Grade Mansar</p>
+</div>
+<div class="text-[8px] font-mono opacity-80 text-right">Depth: 185m – 340m</div>
+</div>
+<!-- Side Facet 3D Illusion -->
+<div class="absolute -bottom-3 left-0 right-0 h-3 bg-purple-950/70 origin-top rounded-b" style="transform: rotateX(-60deg);"></div>
+</div>
+<!-- Block 2: Balaghat Deep Stope Mine A (Active Extraction Block) -->
+<div class="strata-block absolute left-[140px] top-[290px] w-44 h-32 rounded-xl bg-gradient-to-tr from-amber-700/40 via-amber-600/50 to-amber-400/80 border-2 border-amber-300/70 shadow-xl backdrop-blur-sm" style="transform: translateZ(40px);">
+<div class="p-2 text-white h-full flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/40 font-bold">MINE-A UNDERGROUND</span>
+<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+</div>
+<div class="text-center">
+<span class="text-xs font-black drop-shadow">44.8% Mn</span>
+<p class="text-[9px] text-amber-100">Shaft 5 Extraction</p>
+</div>
+<div class="text-[8px] font-mono text-amber-200">Deficit Hotspot (-41% Uptime)</div>
+</div>
+</div>
+<!-- Block 3: Dongri Buzurg Opencast Pit Block -->
+<div class="strata-block absolute right-[130px] top-[170px] w-44 h-36 rounded-xl bg-gradient-to-tr from-emerald-800/40 via-emerald-600/60 to-emerald-400/70 border-2 border-emerald-300/70 shadow-xl backdrop-blur-sm" style="transform: translateZ(48px);">
+<div class="p-2 text-white h-full flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/40 font-bold">DONGRI OPENCAST</span>
+<span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+</div>
+<div class="text-center">
+<span class="text-xs font-black drop-shadow">38.2% Mn</span>
+<p class="text-[9px] text-emerald-100">Electrolytic Grade DxD</p>
+</div>
+<div class="text-[8px] font-mono text-emerald-200">Bench Detonation Complete</div>
+</div>
+</div>
+<!-- 3D Drillhole Core Assays (Vertical Cylinder Visuals) -->
+<!-- Borehole BH-MOIL-701 -->
+<div class="absolute left-[390px] top-[260px] pointer-events-none" style="transform: translateZ(65px);">
+<div class="w-1.5 h-20 bg-gradient-to-b from-stone-400 via-purple-600 to-indigo-900 rounded-full shadow-lg border border-white/60 mx-auto"></div>
+<div class="w-5 h-2.5 rounded-full bg-purple-900/80 -mt-1 mx-auto blur-[1px]"></div>
+</div>
+<!-- Borehole BH-MOIL-704 -->
+<div class="absolute left-[450px] top-[320px] pointer-events-none" style="transform: translateZ(50px);">
+<div class="w-1.5 h-16 bg-gradient-to-b from-stone-400 via-amber-500 to-emerald-800 rounded-full shadow-lg border border-white/60 mx-auto"></div>
+<div class="w-4 h-2 rounded-full bg-emerald-900/80 -mt-1 mx-auto blur-[1px]"></div>
+</div>
+<!-- FLOATING 3D GLASS BADGE PINS (Inspired by Reference Spatial Pins) -->
+<!-- Pin 1: Target T-07 Focus Highlight Pin -->
+<div class="pin-3d absolute left-[370px] top-[140px] z-30 cursor-pointer" onclick="selectResourceTarget('T-07')" style="transform-style: preserve-3d;">
+<!-- Radar Ripple behind Pin -->
+<div class="absolute -inset-3 rounded-full bg-purple-500/20 pulse-ring pointer-events-none"></div>
+<div class="glass-panel px-3.5 py-2 rounded-2xl shadow-elevated border-2 border-purple-400 flex items-center space-x-2.5 text-slate-800 min-w-[210px]">
+<div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-xs shadow-md">
+                T-07
+              </div>
+<div>
+<div class="flex items-center space-x-1.5">
+<span class="font-extrabold text-xs text-slate-900">Balaghat NE Strike</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-100 text-purple-800">P50 6.8 Mt</span>
+</div>
+<div class="flex items-center space-x-2 mt-0.5">
+<span class="text-[11px] font-black text-purple-700">51.3% Mn (Ultra Grade)</span>
+<span class="text-[9px] text-slate-500">• 78% Conf.</span>
+</div>
+</div>
+</div>
+<!-- Pin Pointer Stem -->
+<div class="w-0.5 h-7 bg-purple-600 mx-auto shadow-md"></div>
+<div class="w-3 h-1.5 rounded-full bg-purple-900 mx-auto shadow"></div>
+</div>
+<!-- Pin 2: Underground Mine A Production Alert Pin -->
+<div class="pin-3d absolute left-[150px] top-[230px] z-30 cursor-pointer" onclick="switchTrayTab('production')">
+<div class="glass-panel px-3 py-1.5 rounded-2xl shadow-glass border-2 border-rose-400 flex items-center space-x-2 text-slate-800">
+<div class="w-7 h-7 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold text-xs shadow">
+                -3.8k
+              </div>
+<div>
+<div class="flex items-center space-x-1">
+<span class="font-bold text-[11px] text-slate-900">Mine A Production Stoppage</span>
+</div>
+<span class="text-[10px] font-semibold text-rose-700">LHD Loader L-04 Down (-41%)</span>
+</div>
+</div>
+<div class="w-0.5 h-6 bg-rose-500 mx-auto"></div>
+<div class="w-2.5 h-1 rounded-full bg-rose-900 mx-auto"></div>
+</div>
+<!-- Pin 3: Secondary Target T-18 Pin -->
+<div class="pin-3d absolute right-[180px] top-[260px] z-20 cursor-pointer" onclick="selectResourceTarget('T-18')">
+<div class="glass-panel px-3 py-1.5 rounded-2xl shadow-glass border border-emerald-400/90 flex items-center space-x-2 text-slate-800">
+<div class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow">
+                T-18
+              </div>
+<div>
+<span class="font-bold text-[11px] text-slate-900">Ukwa Extension Zone</span>
+<p class="text-[10px] font-bold text-emerald-700">4.2 Mt @ 22.8% Mn</p>
+</div>
+</div>
+<div class="w-0.5 h-5 bg-emerald-600 mx-auto"></div>
+<div class="w-2 h-1 rounded-full bg-emerald-950 mx-auto"></div>
+</div>
+<!-- Pin 4: Secondary Target T-12 Pin -->
+<div class="pin-3d absolute right-[320px] top-[90px] z-20 cursor-pointer" onclick="selectResourceTarget('T-12')">
+<div class="glass-panel px-2.5 py-1.5 rounded-xl shadow-glass border border-stone-300 flex items-center space-x-1.5 text-slate-800">
+<span class="text-[10px] font-bold text-slate-700">Target T-12 • 3.1 Mt</span>
+<span class="text-[10px] font-bold text-slate-500">20.4% Mn</span>
+</div>
+<div class="w-0.5 h-4 bg-stone-500 mx-auto"></div>
+</div>
+</div>
+</div>
+<!-- END: 3DSpatialCanvas -->
+<!-- Floating Map Compass & Tilt Controls (Right Side) -->
+<div class="absolute right-6 top-4 z-20 flex flex-col space-y-2 pointer-events-auto">
+<div class="glass-panel p-1.5 rounded-2xl shadow-glass border border-white flex flex-col space-y-1">
+<button class="w-9 h-9 rounded-xl bg-white hover:bg-stone-50 text-slate-700 flex items-center justify-center shadow-sm font-black text-base active:scale-95 transition" onclick="zoomSpatial(1)" title="Zoom In">+</button>
+<button class="w-9 h-9 rounded-xl bg-white hover:bg-stone-50 text-slate-700 flex items-center justify-center shadow-sm font-black text-base active:scale-95 transition" onclick="zoomSpatial(-1)" title="Zoom Out">−</button>
+<div class="w-6 h-px bg-stone-200 mx-auto"></div>
+<button class="w-9 h-9 rounded-xl bg-white hover:bg-stone-50 text-slate-700 flex items-center justify-center shadow-sm font-bold text-xs active:scale-95 transition" onclick="resetSpatialRotation()" title="Reset North">
+<span class="text-rose-600 font-extrabold text-[11px]">N</span>
+</button>
+<button class="w-9 h-9 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center shadow-sm font-bold text-[10px] active:scale-95 transition" onclick="toggleStratigraphyCutaway()" title="Toggle 3D Stratigraphy Cutaway">
+            3D
+          </button>
+</div>
+</div>
+<!-- BEGIN: BottomHorizontalReserveCarousel -->
+<!-- Floating Bottom Target Cards (Visual direct match with reference layout) -->
+<div class="absolute left-6 right-6 bottom-4 z-30 pointer-events-auto">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center space-x-2">
+<span class="text-xs font-extrabold uppercase tracking-wider text-slate-800 bg-white/80 px-2.5 py-1 rounded-lg border border-stone-200 shadow-sm">
+              Prioritized Manganese Resource Targets (UNFC / JORC Code)
+            </span>
+<span class="text-xs text-slate-500 font-medium">Click card to highlight spatial block</span>
+</div>
+<span class="text-xs font-bold text-slate-600 bg-white/70 px-2 py-0.5 rounded-full border border-stone-200">
+            Total Pipeline: 14.1 Mt
+          </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+<!-- Card 1: Target T-07 (Primary Focus) -->
+<div class="glass-panel p-3.5 rounded-2xl border-2 border-purple-400 shadow-glass cursor-pointer hover:border-purple-600 transition bg-white/95" id="card-target-t07" onclick="selectResourceTarget('T-07')">
+<div class="flex items-center justify-between">
+<div>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-purple-800 uppercase tracking-wider">01 Exploration Target</span>
+<h3 class="text-sm font-extrabold text-slate-900 mt-1">Target T-07 Balaghat North-East</h3>
+</div>
+<span class="px-2 py-1 rounded-lg text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200">HIGH POTENTIAL</span>
+</div>
+<!-- Metrics Grid -->
+<div class="grid grid-cols-2 gap-2 mt-2.5 pt-2.5 border-t border-stone-200/80 font-mono-numbers">
+<div class="bg-stone-50 p-2 rounded-xl border border-stone-200/60">
+<span class="text-[10px] text-slate-500 uppercase font-semibold">Estimated Resource</span>
+<p class="text-sm font-extrabold text-slate-900">6.8 Mt <span class="text-purple-700 font-bold text-xs">@ 24.3% Mn</span></p>
+</div>
+<div class="bg-stone-50 p-2 rounded-xl border border-stone-200/60">
+<span class="text-[10px] text-slate-500 uppercase font-semibold">High-Grade Strike</span>
+<p class="text-sm font-extrabold text-purple-700">51.3% Mn <span class="text-slate-500 text-[10px] font-normal">(Core #701)</span></p>
+</div>
+</div>
+<!-- Recommendation & Action -->
+<div class="mt-2.5 flex items-center justify-between text-xs">
+<span class="text-[11px] text-slate-600 font-medium truncate max-w-[210px]">
+<strong class="text-slate-800">Next:</strong> Targeted drilling (200m grid core boreholes)
+              </span>
+<button class="px-2.5 py-1 rounded-lg bg-purple-900 hover:bg-purple-800 text-white font-bold text-[11px] flex items-center space-x-1 shadow-sm">
+<span>View Evidence</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- Card 2: Target T-18 (Ukwa Extension) -->
+<div class="glass-panel p-3.5 rounded-2xl border border-stone-200 shadow-glass cursor-pointer hover:border-emerald-500 transition bg-white/95" id="card-target-t18" onclick="selectResourceTarget('T-18')">
+<div class="flex items-center justify-between">
+<div>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-stone-100 text-slate-700 uppercase tracking-wider">02 Prospective Block</span>
+<h3 class="text-sm font-extrabold text-slate-900 mt-1">Target T-18 Ukwa Strike Corridor</h3>
+</div>
+<span class="px-2 py-1 rounded-lg text-xs font-bold bg-stone-100 text-slate-700">MEDIUM CONFIDENCE</span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-2.5 pt-2.5 border-t border-stone-200/80 font-mono-numbers">
+<div class="bg-stone-50 p-2 rounded-xl border border-stone-200/60">
+<span class="text-[10px] text-slate-500 uppercase font-semibold">Estimated Resource</span>
+<p class="text-sm font-extrabold text-slate-900">4.2 Mt <span class="text-emerald-700 font-bold text-xs">@ 22.8% Mn</span></p>
+</div>
+<div class="bg-stone-50 p-2 rounded-xl border border-stone-200/60">
+<span class="text-[10px] text-slate-500 uppercase font-semibold">Lithology Type</span>
+<p class="text-xs font-bold text-slate-800 pt-0.5">Mansar Mica-Schist</p>
+</div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-xs">
+<span class="text-[11px] text-slate-600 font-medium truncate max-w-[210px]">
+<strong class="text-slate-800">Next:</strong> Induced Polarization (IP) Geophysics
+              </span>
+<button class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-stone-200 text-slate-800 font-bold text-[11px]">
+                Inspect Block
+              </button>
+</div>
+</div>
+<!-- Card 3: Target T-12 (Tirodi Gneissic Border) -->
+<div class="glass-panel p-3.5 rounded-2xl border border-stone-200 shadow-glass cursor-pointer hover:border-emerald-500 transition bg-white/95" id="card-target-t12" onclick="selectResourceTarget('T-12')">
+<div class="flex items-center justify-between">
+<div>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-stone-100 text-slate-700 uppercase tracking-wider">03 Regional Prospect</span>
+<h3 class="text-sm font-extrabold text-slate-900 mt-1">Target T-12 Dongri North Fringe</h3>
+</div>
+<span class="px-2 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">RE-SURVEY REQ</span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-2.5 pt-2.5 border-t border-stone-200/80 font-mono-numbers">
+<div class="bg-stone-50 p-2 rounded-xl border border-stone-200/60">
+<span class="text-[10px] text-slate-500 uppercase font-semibold">Estimated Resource</span>
+<p class="text-sm font-extrabold text-slate-900">3.1 Mt <span class="text-slate-600 font-bold text-xs">@ 20.4% Mn</span></p>
+</div>
+<div class="bg-stone-50 p-2 rounded-xl border border-stone-200/60">
+<span class="text-[10px] text-slate-500 uppercase font-semibold">Confidence (JORC)</span>
+<p class="text-xs font-bold text-slate-800 pt-0.5">Inferred (42% Var)</p>
+</div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-xs">
+<span class="text-[11px] text-slate-600 font-medium truncate max-w-[210px]">
+<strong class="text-slate-800">Next:</strong> Sentinel-2 SWIR band normalization
+              </span>
+<button class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-stone-200 text-slate-800 font-bold text-[11px]">
+                Inspect Block
+              </button>
+</div>
+</div>
+</div>
+</div>
+<!-- END: BottomHorizontalReserveCarousel -->
+</div>
+<!-- BEGIN: RightOperationalAnalyticsDrawer -->
+<!-- Collapsible Slide-over Analytics Tray (Matching exact screens: Production Gap, Waterfall, What-If Simulator) -->
+<div class="fixed top-[61px] right-0 bottom-0 w-full max-w-[580px] bg-[#FAF9F6] border-l border-stone-300 shadow-2xl z-40 transform transition-transform duration-300 ease-in-out flex flex-col translate-x-0" data-purpose="operational-analytics-drawer" id="analyticsTray">
+<!-- Drawer Top Bar & Tabs -->
+<div class="px-6 py-3.5 border-b border-stone-200 bg-white flex items-center justify-between">
+<div>
+<div class="flex items-center space-x-2">
+<h2 class="font-extrabold text-base text-slate-900 tracking-tight">Mining Intelligence Center</h2>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800">LIVE SYNC</span>
+</div>
+<p class="text-xs text-slate-500">Balaghat Deep • Dongri Buzurg • Kandri Sectors</p>
+</div>
+<button class="p-1.5 rounded-xl hover:bg-stone-100 text-slate-500 transition" onclick="toggleAnalyticsTray()">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Segment Tabs -->
+<div class="px-6 pt-3 pb-2 bg-white border-b border-stone-200 flex space-x-2 text-xs font-bold">
+<button class="px-3 py-1.5 rounded-xl bg-slate-900 text-white shadow-sm flex items-center space-x-1.5 transition" id="tab-btn-production" onclick="switchTrayTab('production')">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Production Deficit</span>
+</button>
+<button class="px-3 py-1.5 rounded-xl bg-stone-100 text-slate-600 hover:bg-stone-200 transition flex items-center space-x-1.5" id="tab-btn-simulator" onclick="switchTrayTab('simulator')">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>What-If Simulator</span>
+</button>
+<button class="px-3 py-1.5 rounded-xl bg-stone-100 text-slate-600 hover:bg-stone-200 transition flex items-center space-x-1.5" id="tab-btn-directives" onclick="switchTrayTab('directives')">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Shift Directives (3)</span>
+</button>
+</div>
+<!-- Drawer Scrollable Content Body -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- TAB CONTENT 1: PRODUCTION FORECAST & DEFICIT (DATA EXACT FROM IMAGE_11) -->
+<div class="space-y-5" id="tab-panel-production">
+<!-- Top 4 Production Indicator Cards -->
+<div class="grid grid-cols-2 gap-3 font-mono-numbers">
+<div class="bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm">
+<span class="text-[11px] text-slate-500 font-semibold uppercase">Planned Monthly Target</span>
+<p class="text-2xl font-black text-slate-900 mt-1">52,000 <span class="text-xs font-bold text-slate-500">Tonnes</span></p>
+<p class="text-[10px] text-slate-500 mt-1">Required: ~1,733 t/day across 3 sectors</p>
+</div>
+<div class="bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm">
+<span class="text-[11px] text-amber-700 font-semibold uppercase flex items-center space-x-1">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span>Projected Month-End Output</span>
+</span>
+<p class="text-2xl font-black text-slate-900 mt-1">48,200 <span class="text-xs font-bold text-slate-500">Tonnes</span></p>
+<p class="text-[10px] text-slate-600 mt-1">Verified actual to date: <strong class="text-slate-800">33,950 t</strong> (Day 21)</p>
+</div>
+<div class="bg-rose-50/70 p-3.5 rounded-2xl border border-rose-200 shadow-sm col-span-2">
+<div class="flex items-center justify-between">
+<span class="text-[11px] text-rose-800 font-bold uppercase tracking-wider flex items-center space-x-1.5">
+<svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Projected Production Deficit</span>
+</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-200/80 text-rose-900 uppercase">AT RISK</span>
+</div>
+<div class="flex items-baseline space-x-2 mt-1">
+<span class="text-3xl font-black text-rose-600">-3,800</span>
+<span class="text-sm font-bold text-rose-700">Tonnes (-7.3% gap)</span>
+</div>
+<p class="text-xs text-rose-900/80 font-medium mt-1">
+                • Operational recovery intervention mandatory before Day 24 shift change.
+              </p>
+</div>
+</div>
+<!-- Operational Briefing: What Will Happen If We Do Nothing? (From IMAGE_11) -->
+<div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+<h4 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center space-x-2 pb-2.5 border-b border-stone-100">
+<span class="w-2 h-2 rounded-full bg-rose-600"></span>
+<span>Operational Briefing • What Happens If We Do Nothing?</span>
+</h4>
+<div class="mt-3 space-y-3 text-xs">
+<div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200/60">
+<p class="text-[10px] text-slate-500 font-bold uppercase">1. Will we meet target?</p>
+<p class="text-xs font-bold text-rose-600 mt-0.5">No, current trend shows 12% compound shortfall by month-end.</p>
+<p class="text-[11px] text-slate-500 mt-0.5">Projected output: 48,200 t (-3,800 t to -6,200 t deficit range).</p>
+</div>
+<div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200/60">
+<p class="text-[10px] text-slate-500 font-bold uppercase">2. When will it become unrecoverable?</p>
+<p class="text-xs font-bold text-slate-800 mt-0.5">Around Shift 52 (in 4 days).</p>
+<p class="text-[11px] text-slate-500 mt-0.5">Run-rate breaches minimum physical shaft capacity threshold.</p>
+</div>
+<div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200/60">
+<p class="text-[10px] text-slate-500 font-bold uppercase">3. Primary Root Causes (Telemetry Analysis)</p>
+<ul class="mt-1 space-y-1 text-[11px] text-slate-700">
+<li class="flex items-center justify-between">
+<span class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+<span>Equipment downtime (Balaghat deep shaft loader L-04)</span>
+</span>
+<strong class="text-rose-600 font-mono">41% of deficit</strong>
+</li>
+<li class="flex items-center justify-between">
+<span class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span>Bench 4 post-blast safety clearance wait (12h cycle)</span>
+</span>
+<strong class="text-amber-700 font-mono">27% of deficit</strong>
+</li>
+<li class="flex items-center justify-between">
+<span class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+<span>Pit incline haul road traction loss (Rain seepage)</span>
+</span>
+<strong class="text-slate-700 font-mono">19% of deficit</strong>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Production Waterfall Deficit Bar Visual -->
+<div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Deficit Attribution Breakdown</span>
+<span class="text-[10px] font-mono text-slate-500">3,800 Tonnes Loss</span>
+</div>
+<!-- Stacked Bar -->
+<div class="h-4 w-full rounded-xl bg-stone-100 flex overflow-hidden border border-stone-200">
+<div class="bg-rose-500 h-full" style="width: 41%;" title="Equipment Uptime 41%"></div>
+<div class="bg-amber-500 h-full" style="width: 27%;" title="Blasting Window 27%"></div>
+<div class="bg-blue-500 h-full" style="width: 19%;" title="Pit Drainage 19%"></div>
+<div class="bg-slate-400 h-full" style="width: 13%;" title="Crusher Choke 13%"></div>
+</div>
+<div class="flex items-center justify-between text-[10px] text-slate-500 font-medium mt-2">
+<span class="flex items-center space-x-1"><span class="w-2 h-2 rounded bg-rose-500"></span><span>Equip 41%</span></span>
+<span class="flex items-center space-x-1"><span class="w-2 h-2 rounded bg-amber-500"></span><span>Blast 27%</span></span>
+<span class="flex items-center space-x-1"><span class="w-2 h-2 rounded bg-blue-500"></span><span>Traction 19%</span></span>
+<span class="flex items-center space-x-1"><span class="w-2 h-2 rounded bg-slate-400"></span><span>Crush 13%</span></span>
+</div>
+</div>
+</div>
+<!-- TAB CONTENT 2: WHAT-IF SENSITIVITY SIMULATOR (DATA EXACT FROM IMAGE_13) -->
+<div class="space-y-5 hidden" id="tab-panel-simulator">
+<!-- Simulator Header & Reset -->
+<div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-sm font-extrabold text-slate-900">Scenario Sensitivity Controls</h4>
+<p class="text-xs text-slate-500">Adjust operational levers to model shortfall recovery</p>
+</div>
+<button class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-stone-100 hover:bg-stone-200 text-slate-700 transition" onclick="resetSimulator()">
+                Reset
+              </button>
+</div>
+<!-- Sliders Container -->
+<div class="mt-4 space-y-4 text-xs">
+<!-- Slider 1: Equipment Availability -->
+<div class="bg-stone-50 p-3 rounded-xl border border-stone-200/80">
+<div class="flex items-center justify-between">
+<span class="font-bold text-slate-800 flex items-center space-x-1.5">
+<svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Equipment Availability</span>
+</span>
+<span class="font-mono text-xs">Baseline: 72% → <strong class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded font-bold" id="val-equipment">85%</strong></span>
+</div>
+<input class="w-full mt-2 accent-moil-primary" id="slider-equipment" max="95" min="60" oninput="updateScenarioModel()" type="range" value="85"/>
+<div class="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+<span>60% (Critical)</span>
+<span>72% (Baseline)</span>
+<span>95% (Max)</span>
+</div>
+</div>
+<!-- Slider 2: Blasting Delay Window -->
+<div class="bg-stone-50 p-3 rounded-xl border border-stone-200/80">
+<div class="flex items-center justify-between">
+<span class="font-bold text-slate-800 flex items-center space-x-1.5">
+<svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Blasting Delay Window</span>
+</span>
+<span class="font-mono text-xs">Baseline: 12h → <strong class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded font-bold" id="val-blasting">6h</strong></span>
+</div>
+<input class="w-full mt-2 accent-moil-primary" id="slider-blasting" max="24" min="2" oninput="updateScenarioModel()" type="range" value="6"/>
+<div class="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+<span>2h (Optimal)</span>
+<span>6h (Target)</span>
+<span>12h (Baseline)</span>
+<span>24h (Max Stoppage)</span>
+</div>
+</div>
+<!-- Slider 3: Mine A High-Grade Feed Ratio -->
+<div class="bg-stone-50 p-3 rounded-xl border border-stone-200/80">
+<div class="flex items-center justify-between">
+<span class="font-bold text-slate-800 flex items-center space-x-1.5">
+<svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Mine A High-Grade Feed</span>
+</span>
+<span class="font-mono text-xs">Baseline: 40% → <strong class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded font-bold" id="val-feed">45%</strong></span>
+</div>
+<input class="w-full mt-2 accent-moil-primary" id="slider-feed" max="60" min="25" oninput="updateScenarioModel()" type="range" value="45"/>
+<div class="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+<span>25%</span>
+<span>40% (Baseline)</span>
+<span>45% (Simulated)</span>
+<span>60% (Shaft Limit)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Scenario Outcome Comparison (From IMAGE_13) -->
+<div class="bg-white p-4 rounded-2xl border-2 border-emerald-500 shadow-glass">
+<div class="flex items-center justify-between pb-3 border-b border-stone-200">
+<span class="text-xs font-black uppercase tracking-wider text-slate-900">Scenario Outcome Comparison</span>
+<span class="text-xs font-mono font-bold text-slate-600">Monthly Target: 52.0 kt</span>
+</div>
+<!-- Current vs What-If 2-Column Summary -->
+<div class="grid grid-cols-2 gap-3 mt-3">
+<!-- Current Baseline -->
+<div class="bg-stone-50 p-3 rounded-xl border border-stone-200">
+<span class="text-[10px] uppercase font-bold text-slate-500">Current Plan</span>
+<p class="text-lg font-black text-slate-800 mt-1">48.2 kt</p>
+<div class="text-xs font-bold text-rose-600 mt-0.5">Target gap: -3.8 kt</div>
+<span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">AT RISK (High)</span>
+</div>
+<!-- What-If Scenario -->
+<div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-300">
+<span class="text-[10px] uppercase font-bold text-emerald-800">What-If Scenario</span>
+<p class="text-lg font-black text-emerald-900 mt-1" id="sim-forecast-val">50.9 kt</p>
+<div class="text-xs font-bold text-emerald-700 mt-0.5" id="sim-gap-val">Target gap: -1.1 kt</div>
+<span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-900">LOW RISK</span>
+</div>
+</div>
+<!-- Recovered Production Badge -->
+<div class="mt-3 bg-emerald-100/70 p-3 rounded-xl border border-emerald-300 flex items-center justify-between">
+<div>
+<span class="text-[10px] font-bold uppercase text-emerald-900">Improvement (Recovered Output)</span>
+<div class="flex items-baseline space-x-1 mt-0.5">
+<span class="text-2xl font-black text-emerald-900" id="sim-recovered-val">+2.7 kt</span>
+<span class="text-xs font-bold text-emerald-800">(2,700 Tonnes)</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[10px] font-bold uppercase text-emerald-900">Shortfall Closed</span>
+<p class="text-2xl font-black text-emerald-900" id="sim-percent-closed">71%</p>
+</div>
+</div>
+<!-- Why Did Result Change Explanation -->
+<p class="text-[11px] text-slate-600 mt-2.5 leading-relaxed bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+<strong class="text-slate-800">Why did result improve?</strong> Equipment availability jumped from 72% to 85% (+1,495 t), and secondary shift blasting window reduction saved 6 hours (+1,205 t).
+            </p>
+</div>
+</div>
+<!-- TAB CONTENT 3: SHIFT DIRECTIVES & ONE-CLICK ACTIONS (DATA FROM IMAGE_5) -->
+<div class="space-y-4 hidden" id="tab-panel-directives">
+<div class="flex items-center justify-between">
+<span class="text-xs font-black uppercase text-slate-700">Recommended Operational Directives</span>
+<span class="text-xs font-bold text-emerald-700">3 Verified Safe</span>
+</div>
+<!-- Directive 1: Reallocate Loader L-04 (From IMAGE_5) -->
+<div class="bg-white p-4 rounded-2xl border-2 border-emerald-500 shadow-sm relative">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 uppercase">03 RECOMMENDATION • REC-01 • P1</span>
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+</div>
+<h4 class="text-sm font-extrabold text-slate-900 mt-2">
+              Reallocate LHD Loader L-04 to Mine A Balaghat Deep
+            </h4>
+<div class="mt-2.5 p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between font-mono-numbers">
+<span class="text-xs text-emerald-900 font-medium">Expected Recovery:</span>
+<span class="text-sm font-black text-emerald-800">+1,600 t yield</span>
+</div>
+<div class="mt-2 text-xs space-y-1 text-slate-600">
+<p><strong class="text-slate-800">WHY:</strong> Equipment downtime is currently the strongest bottleneck across primary underground extraction stopes.</p>
+<p><strong class="text-slate-800">NEXT:</strong> Shift loader to recover +1,600 t yield within 24–48 hours.</p>
+</div>
+<button class="w-full mt-3 py-2 rounded-xl bg-moil-primary hover:bg-emerald-900 text-white font-bold text-xs shadow transition active:scale-98 flex items-center justify-center space-x-1.5" id="btn-exec-REC-01" onclick="executeDirective('REC-01')">
+<span>Authorize Loader Reallocation</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Directive 2: Synchronize Blast Window -->
+<div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-stone-100 text-slate-700 uppercase">REC-02 • BENCH OPTIMIZATION</span>
+<span class="text-[10px] font-mono text-slate-500">Dongri Opencast</span>
+</div>
+<h4 class="text-sm font-extrabold text-slate-900 mt-2">
+              Synchronize Secondary Detonation with 14:00 Shift Change
+            </h4>
+<div class="mt-2.5 p-2 bg-stone-50 rounded-xl border border-stone-200/80 flex items-center justify-between font-mono-numbers">
+<span class="text-xs text-slate-600 font-medium">Expected Recovery:</span>
+<span class="text-sm font-black text-slate-800">+850 t yield</span>
+</div>
+<div class="mt-2 text-xs text-slate-600">
+<p><strong class="text-slate-800">ACTION:</strong> Compress post-blast smoke clearance from 12 hours down to 6 hours using auxiliary ventilation fans.</p>
+</div>
+<button class="w-full mt-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow transition active:scale-98" id="btn-exec-REC-02" onclick="executeDirective('REC-02')">
+              Issue Shift Order
+            </button>
+</div>
+<!-- Directive 3: High Grade Stope Blend Adjustment -->
+<div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-purple-800 uppercase">REC-03 • BLEND OPTIMIZATION</span>
+<span class="text-[10px] font-mono text-purple-700 font-bold">51.3% Mn Blend</span>
+</div>
+<h4 class="text-sm font-extrabold text-slate-900 mt-2">
+              Increase Balaghat Deep Stope Feed Ratio from 40% to 45%
+            </h4>
+<div class="mt-2.5 p-2 bg-stone-50 rounded-xl border border-stone-200/80 flex items-center justify-between font-mono-numbers">
+<span class="text-xs text-slate-600 font-medium">Quality Gain:</span>
+<span class="text-sm font-black text-purple-900">+2.4% Mn Average Mill Head</span>
+</div>
+<button class="w-full mt-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition" id="btn-exec-REC-03" onclick="executeDirective('REC-03')">
+              Approve Plant Blend Ratio
+            </button>
+</div>
+</div>
+</div>
+<!-- Drawer Footer with Official Signoff Stamp -->
+<div class="p-4 bg-white border-t border-stone-200 flex items-center justify-between text-xs">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+<span class="text-[11px] text-slate-500 font-medium">Compliance: UNFC 111 / ISO 14001</span>
+</div>
+<span class="text-[10px] font-mono text-slate-400">DGMS Safety Cleared • Balaghat Mine</span>
+</div>
+</div>
+<!-- END: RightOperationalAnalyticsDrawer -->
+</main>
+<!-- END: MainDashboardWorkspace -->
+<!-- BEGIN: InstitutionalFooter -->
+<footer class="w-full bg-[#FAF9F5] border-t border-stone-200 px-6 py-2.5 z-20 text-xs text-slate-500" data-purpose="footer-status-bar">
+<div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-2">
+<div class="flex items-center space-x-3">
+<span class="font-bold text-slate-700">MOIL Mining Intelligence Platform</span>
+<span>•</span>
+<span>Explore • Estimate • Predict • Act</span>
+<span>•</span>
+<span class="font-mono text-slate-600">Balaghat-Nagpur Manganese Belt Pilot (SIH26009)</span>
+</div>
+<div class="flex items-center space-x-4">
+<span class="flex items-center space-x-1.5">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span class="font-bold text-amber-900">DEMO MODE: Simulated shift data &amp; telemetry</span>
+</span>
+<span class="text-stone-300">|</span>
+<a class="underline hover:text-slate-800" href="#specification">Problem Specification #26009</a>
+</div>
+</div>
+</footer>
+<!-- END: InstitutionalFooter -->
+<!-- Interactive Dashboard Script Engine -->
+<script data-purpose="dashboard-interactivity">
+    // State management
+    let activeCameraMode = '3d';
+    let isTrayOpen = true;
+    let currentZoom = 1;
+
+    // Camera view switchers
+    function setCameraView(mode) {
+      activeCameraMode = mode;
+      const stage = document.getElementById('spatialStage');
+      stage.classList.remove('view-topdown', 'view-stratigraphy');
+      if (mode === 'topdown') {
+        stage.classList.add('view-topdown');
+      } else if (mode === 'stratigraphy') {
+        stage.classList.add('view-stratigraphy');
+      }
+    }
+
+    function toggleStratigraphyCutaway() {
+      if (activeCameraMode === 'stratigraphy') {
+        setCameraView('3d');
+      } else {
+        setCameraView('stratigraphy');
+      }
+    }
+
+    function resetSpatialRotation() {
+      setCameraView('3d');
+      const stage = document.getElementById('spatialStage');
+      currentZoom = 1;
+      stage.style.transform = `rotateX(46deg) rotateZ(-18deg) scale3d(1.05, 1.05, 1.05)`;
+    }
+
+    function zoomSpatial(delta) {
+      currentZoom += delta * 0.12;
+      if (currentZoom < 0.7) currentZoom = 0.7;
+      if (currentZoom > 1.6) currentZoom = 1.6;
+      const stage = document.getElementById('spatialStage');
+      if (activeCameraMode === 'topdown') {
+        stage.style.transform = `scale3d(${currentZoom}, ${currentZoom}, ${currentZoom})`;
+      } else if (activeCameraMode === 'stratigraphy') {
+        stage.style.transform = `rotateX(65deg) rotateZ(-38deg) scale3d(${currentZoom * 1.15}, ${currentZoom * 1.15}, ${currentZoom * 1.15})`;
+      } else {
+        stage.style.transform = `rotateX(46deg) rotateZ(-18deg) scale3d(${currentZoom * 1.05}, ${currentZoom * 1.05}, ${currentZoom * 1.05})`;
+      }
+    }
+
+    // Slide-over tray toggle
+    function toggleAnalyticsTray() {
+      const tray = document.getElementById('analyticsTray');
+      const chevron = document.getElementById('tray-toggle-chevron');
+      isTrayOpen = !isTrayOpen;
+      if (isTrayOpen) {
+        tray.classList.remove('translate-x-full');
+        chevron.classList.remove('rotate-180');
+      } else {
+        tray.classList.add('translate-x-full');
+        chevron.classList.add('rotate-180');
+      }
+    }
+
+    // Switch right drawer tabs
+    function switchTrayTab(tab) {
+      if (!isTrayOpen) toggleAnalyticsTray();
+      
+      const tabProduction = document.getElementById('tab-panel-production');
+      const tabSimulator = document.getElementById('tab-panel-simulator');
+      const tabDirectives = document.getElementById('tab-panel-directives');
+
+      const btnProduction = document.getElementById('tab-btn-production');
+      const btnSimulator = document.getElementById('tab-btn-simulator');
+      const btnDirectives = document.getElementById('tab-btn-directives');
+
+      // Hide all panels
+      tabProduction.classList.add('hidden');
+      tabSimulator.classList.add('hidden');
+      tabDirectives.classList.add('hidden');
+
+      // Reset buttons
+      [btnProduction, btnSimulator, btnDirectives].forEach(btn => {
+        btn.className = "px-3 py-1.5 rounded-xl bg-stone-100 text-slate-600 hover:bg-stone-200 transition flex items-center space-x-1.5";
+      });
+
+      if (tab === 'production') {
+        tabProduction.classList.remove('hidden');
+        btnProduction.className = "px-3 py-1.5 rounded-xl bg-slate-900 text-white shadow-sm flex items-center space-x-1.5 transition";
+      } else if (tab === 'simulator') {
+        tabSimulator.classList.remove('hidden');
+        btnSimulator.className = "px-3 py-1.5 rounded-xl bg-slate-900 text-white shadow-sm flex items-center space-x-1.5 transition";
+      } else if (tab === 'directives') {
+        tabDirectives.classList.remove('hidden');
+        btnDirectives.className = "px-3 py-1.5 rounded-xl bg-slate-900 text-white shadow-sm flex items-center space-x-1.5 transition";
+      }
+    }
+
+    // What-If Dynamic Calculator
+    function updateScenarioModel() {
+      const equip = parseInt(document.getElementById('slider-equipment').value);
+      const blasting = parseInt(document.getElementById('slider-blasting').value);
+      const feed = parseInt(document.getElementById('slider-feed').value);
+
+      document.getElementById('val-equipment').innerText = equip + '%';
+      document.getElementById('val-blasting').innerText = blasting + 'h';
+      document.getElementById('val-feed').innerText = feed + '%';
+
+      // Baseline: 48.2 kt, target: 52.0 kt (3.8 kt gap)
+      // Equipment gain: ~115 tonnes per % over 72%
+      const equipDelta = (equip - 72) * 115;
+      // Blasting gain: ~200 tonnes per hour saved from 12h
+      const blastingDelta = (12 - blasting) * 200;
+      // Feed gain: ~60 tonnes per % over 40%
+      const feedDelta = (feed - 40) * 60;
+
+      const totalRecovery = Math.max(0, equipDelta + blastingDelta + feedDelta);
+      const newForecast = (48200 + totalRecovery) / 1000;
+      const targetGap = Math.max(0, 52000 - (48200 + totalRecovery)) / 1000;
+      const percentClosed = Math.min(100, Math.round((totalRecovery / 3800) * 100));
+
+      document.getElementById('sim-forecast-val').innerText = newForecast.toFixed(1) + ' kt';
+      document.getElementById('sim-gap-val').innerText = 'Target gap: -' + targetGap.toFixed(1) + ' kt';
+      document.getElementById('sim-recovered-val').innerText = '+' + (totalRecovery / 1000).toFixed(1) + ' kt';
+      document.getElementById('sim-percent-closed').innerText = percentClosed + '%';
+    }
+
+    function resetSimulator() {
+      document.getElementById('slider-equipment').value = 72;
+      document.getElementById('slider-blasting').value = 12;
+      document.getElementById('slider-feed').value = 40;
+      updateScenarioModel();
+    }
+
+    // Resource target selection from carousel
+    function selectResourceTarget(targetId) {
+      ['card-target-t07', 'card-target-t18', 'card-target-t12'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('ring-4', 'ring-purple-400');
+      });
+
+      if (targetId === 'T-07') {
+        document.getElementById('card-target-t07').classList.add('ring-4', 'ring-purple-400');
+      } else if (targetId === 'T-18') {
+        document.getElementById('card-target-t18').classList.add('ring-4', 'ring-purple-400');
+      } else if (targetId === 'T-12') {
+        document.getElementById('card-target-t12').classList.add('ring-4', 'ring-purple-400');
+      }
+    }
+
+    // Action authorization trigger
+    function executeDirective(id) {
+      const btn = document.getElementById('btn-exec-' + id);
+      btn.innerText = 'Authorized by Mine Mgr & Dispatched ✓';
+      btn.classList.remove('bg-moil-primary', 'bg-slate-900');
+      btn.classList.add('bg-emerald-700', 'cursor-default');
+    }
+
+    // Top Navigation hookups
+    document.getElementById('nav-btn-spatial').addEventListener('click', () => setCameraView('3d'));
+    document.getElementById('nav-btn-resource').addEventListener('click', () => selectResourceTarget('T-07'));
+    document.getElementById('nav-btn-production').addEventListener('click', () => switchTrayTab('production'));
+    document.getElementById('nav-btn-scenarios').addEventListener('click', () => switchTrayTab('simulator'));
+  </script>
+</body></html>
